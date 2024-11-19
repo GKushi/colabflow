@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  HttpCode,
+  HttpStatus,
   Post,
   Session,
   ValidationPipe,
 } from '@nestjs/common';
+import { SessionWithUser } from './interface';
 import { LoginDto, RegisterDto } from './dto';
 import { AuthService } from './auth.service';
 
@@ -28,6 +31,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
     loginDto: LoginDto,
@@ -47,5 +51,16 @@ export class AuthController {
       nickName: loggedUser.nickName,
       email: loggedUser.email,
     };
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Session() session: SessionWithUser) {
+    return new Promise<void>((res, rej) => {
+      session.destroy((err) => {
+        if (err) rej(err);
+        res();
+      });
+    });
   }
 }
