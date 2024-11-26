@@ -108,15 +108,15 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [ ] User Module
 
-  - [ ] Generate User module, controller, and service
-  - [ ] Define User entity (fields: id, name, email, password, role, isVerified, createdAt, updatedAt)
-  - [ ] Create Data Transfer Objects (DTOs) for user data validation
-  - [ ] Implement user registration with email verification
-  - [ ] Implement user login and logout functionality
+  - [x] Generate User module, controller, and service
+  - [x] Define User entity (fields: id, name, email, password, role, isVerified, createdAt, updatedAt)
+  - [x] Create Data Transfer Objects (DTOs) for user data validation
+  - [x] Implement user registration with email verification
+  - [x] Implement user login and logout functionality
   - [ ] Implement password reset functionality
-  - [ ] Protect routes using authentication guards
-  - [ ] Hash passwords using bcrypt
-  - [ ] Set up session storage with Redis or MongoDB
+  - [x] Protect routes using authentication guards
+  - [x] Hash passwords using bcrypt
+  - [x] Set up session storage
 
 - [ ] Role and Permission Module
 
@@ -126,12 +126,11 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Create custom decorators and guards for role verification
   - [ ] Assign and manage user roles and permissions
 
-- [ ] Authentication and Authorization
+- [x] Authentication and Authorization
 
-  - [ ] Configure session middleware
-  - [ ] Implement session-based authentication
-  - [ ] Set up secure session configuration (secure cookies, proper expiration)
-  - [ ] Implement CSRF protection
+  - [x] Configure session middleware
+  - [x] Implement session-based authentication
+  - [x] Set up secure session configuration (secure cookies, proper expiration)
 
 - [ ] Project Module
 
@@ -244,17 +243,15 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [ ] Email Service
 
-  - [ ] Set up email service using SendGrid or SMTP
+  - [x] Set up email service using SendGrid or SMTP
   - [ ] Create email templates for various notifications
   - [ ] Implement email queueing and retry mechanisms
   - [ ] Handle email bounces and delivery failures
 
 - [ ] Database Management
 
-  - [ ] Use Prisma migrations for schema changes
-  - [ ] Implement transactional operations where necessary
+  - [x] Use Prisma migrations for schema changes
   - [ ] Optimize database queries and indexing
-  - [ ] Regularly monitor and analyze database performance
   - [ ] Implement data seeding for development and testing environments
 
 - [ ] Future Enhancements
@@ -262,7 +259,5 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Add two-factor authentication (2FA) for enhanced security
 
 - [ ] Documentation
-  - [ ] Write comprehensive README with setup instructions
+  - [x] Write comprehensive README with setup instructions
   - [ ] Document codebase and architecture decisions
-  - [ ] Create contribution guidelines and code of conduct
-  - [ ] Maintain changelogs and versioning information
