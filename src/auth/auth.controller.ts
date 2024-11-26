@@ -1,21 +1,31 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Session,
   ValidationPipe,
 } from '@nestjs/common';
-import { SessionWithUser } from './interface';
+import { NoVerification } from './decorators/no-verification.decorator';
+import { SessionWithUser, UserInSession } from './interfaces';
+import { VerificationService } from './verification.service';
+import { Public } from './decorators/public.decorator';
+import { User } from './decorators/user.decorator';
 import { LoginDto, RegisterDto } from './dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private verificationService: VerificationService,
+  ) {}
 
   @Post('register')
+  @Public()
   async register(
     @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
     registerDto: RegisterDto,
@@ -31,11 +41,12 @@ export class AuthController {
   }
 
   @Post('login')
+  @Public()
   @HttpCode(HttpStatus.OK)
   async login(
     @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
     loginDto: LoginDto,
-    @Session() session: Record<string, any>,
+    @Session() session: SessionWithUser,
   ) {
     const loggedUser = await this.authService.login(loginDto);
 
@@ -54,13 +65,28 @@ export class AuthController {
   }
 
   @Post('logout')
+  @NoVerification()
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Session() session: SessionWithUser) {
-    return new Promise<void>((res, rej) => {
+    return new Promise<{ message: string }>((res, rej) => {
       session.destroy((err) => {
         if (err) rej(err);
-        res();
+        res({ message: 'Logged out' });
       });
     });
+  }
+
+  @Get('send-verification-token')
+  @NoVerification()
+  async sendVerificationToken(@User() user: UserInSession) {
+    await this.verificationService.createAndSendToken(user.id);
+    return { message: 'Verification token sent' };
+  }
+
+  @Get('verify/:token')
+  @Public()
+  async verify(@Param('token') token: string) {
+    await this.verificationService.verifyToken(token);
+    return { message: 'Email verified' };
   }
 }

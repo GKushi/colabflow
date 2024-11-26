@@ -21,6 +21,7 @@ model User {
   tasksAuthor   Task[]        @relation("TaskAuthor")
   comments      Comment[]
   files         File[]
+  verificationTokens VerificationToken[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -118,4 +119,15 @@ model Session {
   sid       String   @unique
   data      String
   expiresAt DateTime
+}
+
+model VerificationToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@unique([userId, token])
 }

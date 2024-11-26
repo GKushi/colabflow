@@ -27,4 +27,11 @@ export class UserService {
   async findUserById(id: number) {
     return await this.prismaService.user.findUnique({ where: { id } });
   }
+
+  async activateUser(id: number) {
+    return await this.prismaService.user.update({
+      where: { id },
+      data: { emailVerified: true },
+    });
+  }
 }

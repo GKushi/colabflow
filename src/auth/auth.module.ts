@@ -1,11 +1,14 @@
+import { MessagingModule } from '../messaging/messaging.module';
+import { VerificationService } from './verification.service';
 import { AuthController } from './auth.controller';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from '../user/user.module';
+import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { Module } from '@nestjs/common';
 
 @Module({
-  providers: [AuthService],
+  providers: [AuthService, VerificationService],
   controllers: [AuthController],
-  imports: [UserModule],
+  imports: [UserModule, MessagingModule, ConfigModule],
 })
 export class AuthModule {}
