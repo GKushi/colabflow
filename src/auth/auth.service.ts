@@ -97,6 +97,11 @@ export class AuthService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto, userId: number) {
+    if (changePasswordDto.newPassword === changePasswordDto.oldPassword)
+      throw new BadRequestException(
+        'New password cannot be the same as old password',
+      );
+
     const user = await this.userService.findUserById(userId);
     if (!user) throw new NotFoundException('User not found');
 

@@ -1,6 +1,7 @@
 import { MessagingModule } from './messaging/messaging.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { RoleGuard } from './auth/guards/role.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { UserModule } from './user/user.module';
@@ -23,6 +24,10 @@ import { Module } from '@nestjs/common';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
     },
   ],
 })

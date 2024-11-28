@@ -118,13 +118,12 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Hash passwords using bcrypt
   - [x] Set up session storage
 
-- [ ] Role and Permission Module
+- [x] Role and Permission Module
 
-  - [ ] Define roles: Administrator, Manager, Team Member, Guest
-  - [ ] Create Role entity and establish relationships with User entity
-  - [ ] Implement Role-Based Access Control (RBAC)
-  - [ ] Create custom decorators and guards for role verification
-  - [ ] Assign and manage user roles and permissions
+  - [x] Define roles: Administrator, Manager, Team Member
+  - [x] Create Role entity and establish relationships with User entity
+  - [x] Create custom decorators and guards for role verification
+  - [x] Assign and manage user roles and permissions
 
 - [x] Authentication and Authorization
 

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -93,7 +92,7 @@ export class AuthController {
   @Get('verify/:token')
   @Public()
   async verify(@Param('token') token: string) {
-    await this.verificationService.verifyToken(token);
+    await this.authService.verify(token);
     return { message: 'Email verified' };
   }
 
@@ -127,10 +126,6 @@ export class AuthController {
     @User() user: UserInSession,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    if (changePasswordDto.newPassword === changePasswordDto.oldPassword)
-      throw new BadRequestException(
-        'New password cannot be the same as old password',
-      );
     await this.authService.changePassword(changePasswordDto, user.id);
     return { message: 'Password changed' };
   }
