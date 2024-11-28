@@ -1,7 +1,7 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, User } from '@prisma/client';
 import { CreateUserData } from './interfaces';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -32,6 +32,13 @@ export class UserService {
     return await this.prismaService.user.update({
       where: { id },
       data: { emailVerified: true },
+    });
+  }
+
+  async updateUser(id: number, data: Partial<User>) {
+    return this.prismaService.user.update({
+      where: { id },
+      data,
     });
   }
 }

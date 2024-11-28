@@ -106,14 +106,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 ## Todo list
 
-- [ ] User Module
+- [x] User Module
 
   - [x] Generate User module, controller, and service
   - [x] Define User entity (fields: id, name, email, password, role, isVerified, createdAt, updatedAt)
   - [x] Create Data Transfer Objects (DTOs) for user data validation
   - [x] Implement user registration with email verification
   - [x] Implement user login and logout functionality
-  - [ ] Implement password reset functionality
+  - [x] Implement password reset functionality
   - [x] Protect routes using authentication guards
   - [x] Hash passwords using bcrypt
   - [x] Set up session storage

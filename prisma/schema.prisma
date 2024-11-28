@@ -8,22 +8,22 @@ datasource db {
 }
 
 model User {
-  id            Int           @id @default(autoincrement())
-  nickName      String        @unique
-  firstName     String
-  lastName      String
-  passwordHash  String
-  email         String        @unique
-  emailVerified Boolean       @default(false)
-  role          Role          @default(TEAM_MEMBER)
-  projects      ProjectUser[]
-  tasks         Task[]        @relation("AssignedTask")
-  tasksAuthor   Task[]        @relation("TaskAuthor")
-  comments      Comment[]
-  files         File[]
+  id                 Int                 @id @default(autoincrement())
+  nickName           String              @unique
+  firstName          String
+  lastName           String
+  passwordHash       String
+  email              String              @unique
+  emailVerified      Boolean             @default(false)
+  role               Role                @default(TEAM_MEMBER)
+  projects           ProjectUser[]
+  tasks              Task[]              @relation("AssignedTask")
+  tasksAuthor        Task[]              @relation("TaskAuthor")
+  comments           Comment[]
+  files              File[]
   verificationTokens VerificationToken[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 }
 
 enum Role {
@@ -122,12 +122,18 @@ model Session {
 }
 
 model VerificationToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
+  id        Int                   @id @default(autoincrement())
+  token     String                @unique
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User                  @relation(fields: [userId], references: [id])
+  type      VerificationTokenType
   expiresAt DateTime
 
-  @@index([expiresAt])
   @@unique([userId, token])
+  @@index([expiresAt])
+}
+
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
 }

@@ -6,7 +6,7 @@ import {
 import { EmailService } from '../messaging/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { UserService } from '../user/user.service';
+import { VerificationTokenType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 
@@ -17,41 +17,35 @@ export class VerificationService {
   constructor(
     private prismaService: PrismaService,
     private emailService: EmailService,
-    private userService: UserService,
     private configService: ConfigService,
   ) {}
 
-  private async createToken(userId: number) {
-    return this.prismaService.verificationToken.create({
-      data: {
-        userId,
-        expiresAt: new Date(Date.now() + this.tokenExpirationTime),
-        token: randomUUID(),
-      },
-    });
-  }
-
-  private async getOrCreateToken(userId: number) {
+  private async getOrCreateToken(userId: number, type: VerificationTokenType) {
     let token = await this.prismaService.verificationToken.findFirst({
-      where: { userId, expiresAt: { gt: new Date() } },
+      where: { userId, expiresAt: { gt: new Date() }, type },
     });
 
-    if (!token) token = await this.createToken(userId);
+    if (!token)
+      token = await this.prismaService.verificationToken.create({
+        data: {
+          userId,
+          type,
+          expiresAt: new Date(Date.now() + this.tokenExpirationTime),
+          token: randomUUID(),
+        },
+      });
 
     return token;
   }
 
-  async createAndSendToken(userId: number) {
-    const user = await this.userService.findUserById(userId);
+  async createAndSendEmailVerificationToken(userId: number, userEmail: string) {
+    const token = await this.getOrCreateToken(
+      userId,
+      VerificationTokenType.EMAIL_VERIFICATION,
+    );
 
-    if (!user) throw new NotFoundException('User not found');
-    if (user.emailVerified)
-      throw new BadRequestException('Email already verified');
-
-    const token = await this.getOrCreateToken(userId);
-
-    this.emailService.sendMail({
-      recipient: user.email,
+    await this.emailService.sendMail({
+      recipient: userEmail,
       subject: 'Verify your email address',
       htmlMessage: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -60,7 +54,7 @@ export class VerificationService {
             Thank you for signing up! To complete your registration and verify your email address, please click the button below:
           </p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${this.configService.get('APP_URL')}/auth/verify/${token.token}" 
+            <a href="${this.configService.get('FRONTEND_URL')}/verify/${token.token}" 
                style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
               Verify Email Address
             </a>
@@ -70,6 +64,38 @@ export class VerificationService {
           </p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
             This verification link will expire in 10 minutes.
+          </p>
+        </div>
+      `,
+    });
+  }
+
+  async createAndSendPasswordResetToken(userId: number, userEmail: string) {
+    const token = await this.getOrCreateToken(
+      userId,
+      VerificationTokenType.PASSWORD_RESET,
+    );
+
+    await this.emailService.sendMail({
+      recipient: userEmail,
+      subject: 'Reset your password',
+      htmlMessage: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #333; margin-bottom: 20px;">Password Reset</h1>
+          <p style="color: #666; font-size: 16px; line-height: 1.5;">
+            To reset your password, please click the button below:
+          </p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${this.configService.get('FRONTEND_URL')}/reset-password/${token.token}" 
+               style="background-color: #4CAF50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+              Reset Password
+            </a>
+          </div>
+          <p style="color: #666; font-size: 14px;">
+            If you did not request a password reset, you can safely ignore this email.
+          </p>
+          <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            This password reset link will expire in 10 minutes.
           </p>
         </div>
       `,
@@ -86,15 +112,16 @@ export class VerificationService {
     if (foundToken.expiresAt < new Date())
       throw new BadRequestException('Token expired');
 
-    await this.userService.activateUser(foundToken.userId);
     await this.prismaService.verificationToken.delete({
       where: { id: foundToken.id },
     });
+
+    return foundToken.userId;
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  removeExpiredTokens() {
-    this.prismaService.verificationToken.deleteMany({
+  async removeExpiredTokens() {
+    await this.prismaService.verificationToken.deleteMany({
       where: { expiresAt: { lt: new Date() } },
     });
   }

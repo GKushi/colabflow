@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -9,12 +10,18 @@ import {
   Session,
   ValidationPipe,
 } from '@nestjs/common';
+import {
+  LoginDto,
+  RegisterDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+} from './dto';
 import { NoVerification } from './decorators/no-verification.decorator';
 import { SessionWithUser, UserInSession } from './interfaces';
 import { VerificationService } from './verification.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
-import { LoginDto, RegisterDto } from './dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -66,7 +73,7 @@ export class AuthController {
 
   @Post('logout')
   @NoVerification()
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   async logout(@Session() session: SessionWithUser) {
     return new Promise<{ message: string }>((res, rej) => {
       session.destroy((err) => {
@@ -79,7 +86,7 @@ export class AuthController {
   @Get('send-verification-token')
   @NoVerification()
   async sendVerificationToken(@User() user: UserInSession) {
-    await this.verificationService.createAndSendToken(user.id);
+    await this.authService.sendVerificationToken(user.id);
     return { message: 'Verification token sent' };
   }
 
@@ -88,5 +95,43 @@ export class AuthController {
   async verify(@Param('token') token: string) {
     await this.verificationService.verifyToken(token);
     return { message: 'Email verified' };
+  }
+
+  @Post('forgot-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    try {
+      await this.authService.forgotPassword(forgotPasswordDto);
+    } catch {
+      console.error('Failed to send password reset token');
+    }
+    return { message: 'Password reset token sent' };
+  }
+
+  @Post('reset-password/:token')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    await this.authService.resetPassword(token, resetPasswordDto);
+    return { message: 'Password reset' };
+  }
+
+  @Post('change-password')
+  @NoVerification()
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @User() user: UserInSession,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    if (changePasswordDto.newPassword === changePasswordDto.oldPassword)
+      throw new BadRequestException(
+        'New password cannot be the same as old password',
+      );
+    await this.authService.changePassword(changePasswordDto, user.id);
+    return { message: 'Password changed' };
   }
 }

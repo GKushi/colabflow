@@ -1,7 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RegisterDto,
+  ResetPasswordDto,
+} from './dto';
 import { VerificationService } from './verification.service';
 import { UserService } from 'src/user/user.service';
-import { LoginDto, RegisterDto } from './dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -28,7 +39,10 @@ export class AuthService {
     });
 
     try {
-      await this.verificationService.createAndSendToken(createdUser.id);
+      await this.verificationService.createAndSendEmailVerificationToken(
+        createdUser.id,
+        createdUser.email,
+      );
     } catch {
       console.error('Failed to send verification token');
     }
@@ -39,8 +53,63 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const foundUser = await this.userService.findUserByEmail(loginDto.email);
     if (!foundUser) throw new UnauthorizedException('Invalid credentials');
-    if (!this.comparePassword(loginDto.password, foundUser.passwordHash))
+    if (
+      !(await this.comparePassword(loginDto.password, foundUser.passwordHash))
+    )
       throw new UnauthorizedException('Invalid credentials');
     return foundUser;
+  }
+
+  async sendVerificationToken(userId: number) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.emailVerified)
+      throw new BadRequestException('Email already verified');
+
+    await this.verificationService.createAndSendEmailVerificationToken(
+      userId,
+      user.email,
+    );
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const foundUser = await this.userService.findUserByEmail(
+      forgotPasswordDto.email,
+    );
+    if (!foundUser) throw new NotFoundException('User not found');
+
+    await this.verificationService.createAndSendPasswordResetToken(
+      foundUser.id,
+      foundUser.email,
+    );
+  }
+
+  async verify(token: string) {
+    const userId = await this.verificationService.verifyToken(token);
+    await this.userService.activateUser(userId);
+  }
+
+  async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
+    const userId = await this.verificationService.verifyToken(token);
+    await this.userService.updateUser(userId, {
+      passwordHash: await this.hashPassword(resetPasswordDto.password),
+    });
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto, userId: number) {
+    const user = await this.userService.findUserById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (
+      !(await this.comparePassword(
+        changePasswordDto.oldPassword,
+        user.passwordHash,
+      ))
+    )
+      throw new UnauthorizedException('Invalid credentials');
+
+    await this.userService.updateUser(userId, {
+      passwordHash: await this.hashPassword(changePasswordDto.newPassword),
+    });
   }
 }
