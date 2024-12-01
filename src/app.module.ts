@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Module } from '@nestjs/common';
     AuthModule,
     MessagingModule,
     ScheduleModule.forRoot(),
+    ProjectModule,
   ],
   controllers: [AppController],
   providers: [

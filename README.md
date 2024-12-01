@@ -131,15 +131,13 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement session-based authentication
   - [x] Set up secure session configuration (secure cookies, proper expiration)
 
-- [ ] Project Module
+- [x] Project Module
 
-  - [ ] Generate Project module, controller, and service
-  - [ ] Define Project entity (fields: id, name, description, status, createdAt, updatedAt)
-  - [ ] Create DTOs for project creation and updates
-  - [ ] Implement CRUD operations for projects
-  - [ ] Establish many-to-many relationship between Projects and Users
-  - [ ] Implement project status management (e.g., Active, Completed, On Hold)
-  - [ ] Implement pagination and filtering for project listings
+  - [x] Generate Project module, controller, and service
+  - [x] Define Project entity (fields: id, name, description, status, createdAt, updatedAt)
+  - [x] Create DTOs for project creation and updates
+  - [x] Implement CRUD operations for projects
+  - [x] Establish many-to-many relationship between Projects and Users
 
 - [ ] Task Module
 
@@ -192,6 +190,7 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Implement search functionality for projects, tasks, and users
   - [ ] Implement filters (e.g., by status, priority, assigned user)
   - [ ] Implement sorting options (e.g., by date, name, priority)
+  - [ ] Implement pagination
   - [ ] Optimize search queries for performance using indexes
   - [ ] Consider implementing full-text search capabilities
 

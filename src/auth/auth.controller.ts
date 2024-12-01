@@ -99,7 +99,10 @@ export class AuthController {
   @Post('forgot-password')
   @Public()
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  async forgotPassword(
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    forgotPasswordDto: ForgotPasswordDto,
+  ) {
     try {
       await this.authService.forgotPassword(forgotPasswordDto);
     } catch {
@@ -113,7 +116,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resetPassword(
     @Param('token') token: string,
-    @Body() resetPasswordDto: ResetPasswordDto,
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    resetPasswordDto: ResetPasswordDto,
   ) {
     await this.authService.resetPassword(token, resetPasswordDto);
     return { message: 'Password reset' };
@@ -124,7 +128,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async changePassword(
     @User() user: UserInSession,
-    @Body() changePasswordDto: ChangePasswordDto,
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    changePasswordDto: ChangePasswordDto,
   ) {
     await this.authService.changePassword(changePasswordDto, user.id);
     return { message: 'Password changed' };
