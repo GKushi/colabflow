@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { SeedModule } from './seed/seed.module';
+import { TaskModule } from './task/task.module';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { Module } from '@nestjs/common';
@@ -22,6 +23,7 @@ import { Module } from '@nestjs/common';
     ScheduleModule.forRoot(),
     ProjectModule,
     SeedModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [

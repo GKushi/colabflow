@@ -141,8 +141,8 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [ ] Task Module
 
-  - [ ] Generate Task module, controller, and service
-  - [ ] Define Task entity (fields: id, title, description, status, priority, deadline, assignedUserId, projectId, createdAt, updatedAt)
+  - [x] Generate Task module, controller, and service
+  - [x] Define Task entity (fields: id, title, description, status, priority, deadline, assignedUserId, projectId, createdAt, updatedAt)
   - [ ] Create DTOs for task creation and updates
   - [ ] Implement CRUD operations for tasks
   - [ ] Implement assigning tasks to users
@@ -259,3 +259,6 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [ ] Documentation
   - [x] Write comprehensive README with setup instructions
   - [ ] Document codebase and architecture decisions
+
+- [ ] Refinements
+  - [ ] Add some optional database fields (e.g. assignedUser in Task model)

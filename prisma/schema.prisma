@@ -37,6 +37,7 @@ model Project {
   name        String
   description String?
   users       ProjectUser[]
+  tasks       Task[]        @relation("ProjectTask")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -57,6 +58,8 @@ model Task {
   status       Status
   priority     Priority
   deadline     DateTime
+  project      Project  @relation("ProjectTask", fields: [projectId], references: [id])
+  projectId    Int
   assignedTo   User     @relation("AssignedTask", fields: [assignedToId], references: [id])
   assignedToId Int
   createdBy    User     @relation("TaskAuthor", fields: [createdById], references: [id])

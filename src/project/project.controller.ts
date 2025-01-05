@@ -32,7 +32,7 @@ export class ProjectController {
   @Role(RoleEnum.MANAGER)
   @Post()
   async createProject(
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     createProjectDto: CreateProjectDto,
   ) {
     return this.projectService.createProject(createProjectDto);
@@ -42,7 +42,7 @@ export class ProjectController {
   @Patch(':id')
   async editProject(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     editProjectDto: EditProjectDto,
   ) {
     return this.projectService.editProject(id, editProjectDto);

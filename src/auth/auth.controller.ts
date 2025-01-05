@@ -33,7 +33,7 @@ export class AuthController {
   @Post('register')
   @Public()
   async register(
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     registerDto: RegisterDto,
   ) {
     const createdUser = await this.authService.register(registerDto);
@@ -50,7 +50,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   async login(
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     loginDto: LoginDto,
     @Session() session: SessionWithUser,
   ) {
@@ -100,7 +100,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   async forgotPassword(
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     forgotPasswordDto: ForgotPasswordDto,
   ) {
     try {
@@ -116,7 +116,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resetPassword(
     @Param('token') token: string,
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     resetPasswordDto: ResetPasswordDto,
   ) {
     await this.authService.resetPassword(token, resetPasswordDto);
@@ -128,7 +128,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async changePassword(
     @User() user: UserInSession,
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true }))
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     changePasswordDto: ChangePasswordDto,
   ) {
     await this.authService.changePassword(changePasswordDto, user.id);
