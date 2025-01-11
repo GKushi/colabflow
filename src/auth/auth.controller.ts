@@ -18,17 +18,13 @@ import {
 } from './dto';
 import { NoVerification } from './decorators/no-verification.decorator';
 import { SessionWithUser, UserInSession } from './interfaces';
-import { VerificationService } from './verification.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private verificationService: VerificationService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post('register')
   @Public()

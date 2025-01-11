@@ -139,15 +139,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement CRUD operations for projects
   - [x] Establish many-to-many relationship between Projects and Users
 
-- [ ] Task Module
+- [x] Task Module
 
   - [x] Generate Task module, controller, and service
   - [x] Define Task entity (fields: id, title, description, status, priority, deadline, assignedUserId, projectId, createdAt, updatedAt)
-  - [ ] Create DTOs for task creation and updates
-  - [ ] Implement CRUD operations for tasks
-  - [ ] Implement assigning tasks to users
-  - [ ] Implement task status management (e.g., To Do, In Progress, Done)
-  - [ ] Implement real-time updates for task changes using Socket.IO
+  - [x] Create DTOs for task creation and updates
+  - [x] Implement CRUD operations for tasks
+  - [x] Implement assigning tasks to users
+  - [x] Implement task status management (e.g., To Do, In Progress, Done)
 
 - [ ] Comment Module
 
