@@ -9,9 +9,6 @@ import { Status, Priority } from '@prisma/client';
 
 export class CreateTaskDto {
   @IsNumber()
-  project: number;
-
-  @IsNumber()
   assignedTo: number;
 
   @IsString()

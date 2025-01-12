@@ -11,13 +11,21 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Role } from '../auth/decorators/role.decorator';
+import { User } from '../auth/decorators/user.decorator';
 import { CreateProjectDto, EditProjectDto } from './dto';
+import { TaskService } from '../task/task.service';
+import { UserInSession } from '../auth/interfaces';
 import { ProjectService } from './project.service';
 import { Role as RoleEnum } from '@prisma/client';
+import { CreateTaskDto } from '../task/dto';
 
 @Controller('project')
 export class ProjectController {
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private projectService: ProjectService,
+    private taskService: TaskService,
+  ) {}
+
   @Get()
   async getProjects() {
     return this.projectService.getProjects();
@@ -72,5 +80,24 @@ export class ProjectController {
   ) {
     await this.projectService.removeUserFromProject(id, userId);
     return { message: 'User removed from project' };
+  }
+
+  @Get(':id/tasks')
+  async getProjectTasks(@Param('id', ParseIntPipe) projectId: number) {
+    const tasks = await this.taskService.getTasks(projectId);
+    return tasks.map((task) => {
+      const { projectId, createdAt, updatedAt, ...rest } = task;
+      return rest;
+    });
+  }
+
+  @Post(':id/tasks')
+  async createProjectTask(
+    @Param('id', ParseIntPipe) projectId: number,
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
+    createTaskDto: CreateTaskDto,
+    @User() user: UserInSession,
+  ) {
+    return this.taskService.createTask(createTaskDto, user.id, projectId);
   }
 }

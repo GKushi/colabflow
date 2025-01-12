@@ -31,7 +31,11 @@ export class TaskService {
     return task;
   }
 
-  async createTask(createTaskDto: CreateTaskDto, userId: number) {
+  async createTask(
+    createTaskDto: CreateTaskDto,
+    userId: number,
+    projectId: number,
+  ) {
     try {
       return await this.prismaService.task.create({
         data: {
@@ -39,7 +43,7 @@ export class TaskService {
           deadline: new Date(createTaskDto.deadline),
           project: {
             connect: {
-              id: createTaskDto.project,
+              id: projectId,
             },
           },
           assignedTo: {

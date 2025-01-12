@@ -5,39 +5,19 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Post,
   ValidationPipe,
   Delete,
-  Query,
 } from '@nestjs/common';
-import { User } from '../auth/decorators/user.decorator';
-import { UserInSession } from '../auth/interfaces';
-import { CreateTaskDto, EditTaskDto } from './dto';
 import { TaskService } from './task.service';
+import { EditTaskDto } from './dto';
 
 @Controller('task')
 export class TaskController {
   constructor(private taskService: TaskService) {}
 
-  @Get()
-  getTasks(
-    @Query('project', new ParseIntPipe({ optional: true })) project?: number,
-  ) {
-    return this.taskService.getTasks(project);
-  }
-
   @Get(':id')
   getTask(@Param('id', ParseIntPipe) id: number) {
     return this.taskService.getTask(id);
-  }
-
-  @Post()
-  async createTask(
-    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
-    createTaskDto: CreateTaskDto,
-    @User() user: UserInSession,
-  ) {
-    return this.taskService.createTask(createTaskDto, user.id);
   }
 
   @Patch(':id')
