@@ -148,14 +148,12 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement assigning tasks to users
   - [x] Implement task status management (e.g., To Do, In Progress, Done)
 
-- [ ] Comment Module
+- [x] Comment Module
 
-  - [ ] Generate Comment module, controller, and service
-  - [ ] Define Comment entity (fields: id, content, authorId, taskId, createdAt, updatedAt)
-  - [ ] Create DTOs for comment creation
-  - [ ] Implement adding comments to tasks
-  - [ ] Support Markdown formatting in comments
-  - [ ] Implement real-time comment updates via WebSockets
+  - [x] Generate Comment module, controller, and service
+  - [x] Define Comment entity (fields: id, content, authorId, taskId, createdAt, updatedAt)
+  - [x] Create DTOs for comment creation
+  - [x] Implement adding comments to tasks
 
 - [ ] File Module
 
@@ -261,3 +259,4 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [ ] Refinements
   - [ ] Add some optional database fields (e.g. assignedUser in Task model)
+  - [ ] Authorization checks for specific actions (e.g. only project members can add and see its tasks)

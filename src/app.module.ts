@@ -1,5 +1,6 @@
 import { MessagingModule } from './messaging/messaging.module';
 import { ProjectModule } from './project/project.module';
+import { CommentModule } from './comment/comment.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
@@ -24,6 +25,7 @@ import { Module } from '@nestjs/common';
     ProjectModule,
     SeedModule,
     TaskModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,5 +1,5 @@
+import { Priority, Role, Status, CommentableType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { Priority, Role, Status } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { faker } from '@faker-js/faker';
 import * as bcrypt from 'bcrypt';
@@ -10,6 +10,7 @@ export class SeedService {
   private readonly UserPassword = '123123';
   private readonly ProjectCount = 5;
   private readonly TaskCount = 50;
+  private readonly CommentCount = 100;
 
   constructor(private prismaService: PrismaService) {}
 
@@ -19,6 +20,12 @@ export class SeedService {
     await this.linkProjects(this.UserCount, this.ProjectCount);
     await this.seedTasks(this.TaskCount);
     await this.linkTasks(this.TaskCount, this.ProjectCount);
+    await this.seedComments(this.CommentCount);
+    await this.linkComments(
+      this.CommentCount,
+      this.TaskCount,
+      this.ProjectCount,
+    );
   }
 
   private getLatestIds<T extends { findMany: (options: any) => Promise<any> }>(
@@ -169,6 +176,102 @@ export class SeedService {
           assignedTo: { connect: { id: assignedTo } },
           createdBy: { connect: { id: createdBy } },
           project: { connect: { id: projectId.id } },
+        },
+      });
+    }
+  }
+
+  private async seedComments(count: number) {
+    const generatedComments = faker.helpers.multiple(this.generateComment, {
+      count: count,
+    });
+
+    await this.prismaService.comment.createMany({
+      data: generatedComments,
+    });
+  }
+
+  private generateComment() {
+    const commentData = {
+      commentableType: CommentableType.Task,
+      commentableId: 1,
+      description: faker.lorem.sentences(),
+      createdById: 1,
+    };
+
+    return commentData;
+  }
+
+  private async linkComments(
+    commentCount: number,
+    taskCount: number,
+    projectCount: number,
+  ) {
+    const lastTasksIds = await this.getLatestIds(
+      this.prismaService.task,
+      taskCount,
+    );
+
+    const lastProjectIds = await this.getLatestIds(
+      this.prismaService.project,
+      projectCount,
+    );
+
+    const lastCommentsIds = await this.getLatestIds(
+      this.prismaService.comment,
+      commentCount,
+    );
+
+    for (let i = 0; i < lastCommentsIds.length; i++) {
+      const commentableType = faker.helpers.enumValue(CommentableType);
+
+      let commentableId = 1;
+
+      if (commentableType === CommentableType.Task) {
+        commentableId =
+          lastTasksIds[
+            faker.number.int({ min: 0, max: lastTasksIds.length - 1 })
+          ].id;
+      } else {
+        commentableId =
+          lastProjectIds[
+            faker.number.int({ min: 0, max: lastProjectIds.length - 1 })
+          ].id;
+      }
+
+      const projectId =
+        commentableType === CommentableType.Project
+          ? commentableId
+          : (
+              await this.prismaService.task.findUnique({
+                where: { id: commentableId },
+              })
+            )?.projectId;
+
+      if (!projectId) continue;
+
+      const projectUsers = await this.prismaService.project.findUnique({
+        where: {
+          id: projectId,
+        },
+        select: { users: { select: { userId: true } } },
+      });
+
+      if (!projectUsers) continue;
+
+      const users = projectUsers.users.map((user) => user.userId);
+
+      const createdBy =
+        users[faker.number.int({ min: 0, max: users.length - 1 })];
+
+      if (!lastCommentsIds[i].id || !createdBy) continue;
+
+      await this.prismaService.comment.update({
+        where: { id: lastCommentsIds[i].id },
+        data: {
+          createdBy: { connect: { id: createdBy } },
+          commentableId,
+          commentableType,
         },
       });
     }
