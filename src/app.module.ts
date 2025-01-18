@@ -5,7 +5,6 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AppController } from './app.controller';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { SeedModule } from './seed/seed.module';
@@ -27,7 +26,6 @@ import { Module } from '@nestjs/common';
     TaskModule,
     CommentModule,
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
