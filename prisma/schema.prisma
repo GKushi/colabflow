@@ -43,9 +43,9 @@ model Project {
 }
 
 model ProjectUser {
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  project   Project @relation(fields: [projectId], references: [id])
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId Int
 
   @@id([userId, projectId])
@@ -58,7 +58,7 @@ model Task {
   status       Status
   priority     Priority
   deadline     DateTime
-  project      Project  @relation("ProjectTask", fields: [projectId], references: [id])
+  project      Project  @relation("ProjectTask", fields: [projectId], references: [id], onDelete: Cascade)
   projectId    Int
   assignedTo   User     @relation("AssignedTask", fields: [assignedToId], references: [id])
   assignedToId Int

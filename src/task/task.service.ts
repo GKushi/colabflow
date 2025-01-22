@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProjectService } from '../project/project.service';
 import { PrismaService } from '../prisma/prisma.service';
+import type { UserInSession } from '../auth/interfaces';
 import { CreateTaskDto, EditTaskDto } from './dto';
 import { Prisma } from '@prisma/client';
 
@@ -11,20 +17,30 @@ export class TaskService {
     private projectService: ProjectService,
   ) {}
 
-  async getTasks(project?: number) {
-    if (project) await this.projectService.getProject(project);
+  async checkIfUserCanAccessTask(user: UserInSession, taskId: number) {
+    const task = await this.getTask(taskId);
 
+    await this.projectService.checkIfUserCanAccessProject(user, task.projectId);
+  }
+
+  getTasks(projectId: number) {
     return this.prismaService.task.findMany({
       where: {
         project: {
-          id: project,
+          id: projectId,
         },
+      },
+      include: {
+        assignedTo: true,
       },
     });
   }
 
   async getTask(id: number) {
-    const task = await this.prismaService.task.findUnique({ where: { id } });
+    const task = await this.prismaService.task.findUnique({
+      where: { id },
+      include: { project: true, assignedTo: true, createdBy: true },
+    });
 
     if (!task) throw new NotFoundException('Task not found');
 
@@ -36,6 +52,11 @@ export class TaskService {
     userId: number,
     projectId: number,
   ) {
+    const project = await this.projectService.getProject(projectId);
+
+    if (!project.users.some((el) => el.user.id === createTaskDto.assignedTo))
+      throw new ForbiddenException('User is not in this project');
+
     try {
       return await this.prismaService.task.create({
         data: {
@@ -55,6 +76,11 @@ export class TaskService {
             connect: { id: userId },
           },
         },
+        include: {
+          assignedTo: true,
+          project: true,
+          createdBy: true,
+        },
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -67,11 +93,17 @@ export class TaskService {
   }
 
   async editTask(id: number, editTaskDto: EditTaskDto) {
-    const { project, assignedTo, ...editTaskProps } = editTaskDto;
+    const { assignedTo, ...editTaskProps } = editTaskDto;
 
-    const projectField = project
-      ? { project: { connect: { id: project } } }
-      : {};
+    const task = await this.getTask(id);
+
+    const fetchedProject = await this.projectService.getProject(task.projectId);
+
+    if (
+      assignedTo &&
+      !fetchedProject.users.some((el) => el.user.id === assignedTo)
+    )
+      throw new BadRequestException('User is not in this project');
 
     const assignedToField = assignedTo
       ? { assignedTo: { connect: { id: assignedTo } } }
@@ -80,7 +112,8 @@ export class TaskService {
     try {
       return await this.prismaService.task.update({
         where: { id },
-        data: { ...editTaskProps, ...projectField, ...assignedToField },
+        data: { ...editTaskProps, ...assignedToField },
+        include: { project: true, assignedTo: true, createdBy: true },
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {

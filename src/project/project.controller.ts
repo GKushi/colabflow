@@ -8,8 +8,10 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import { ProjectAccessGuard } from './guards/project-access.guard';
 import { CommentService } from '../comment/comment.service';
 import { Role } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
@@ -30,19 +32,28 @@ export class ProjectController {
   ) {}
 
   @Get()
-  async getProjects() {
-    return this.projectService.getProjects();
+  getProjects(@User() user: UserInSession) {
+    return this.projectService.getProjects(user);
   }
 
+  @UseGuards(ProjectAccessGuard)
   @Get(':id')
   async getProject(@Param('id', ParseIntPipe) id: number) {
     const project = await this.projectService.getProject(id);
-    return { ...project, users: project.users.map((el) => el.userId) };
+
+    return {
+      ...project,
+      users: project.users.map((el) => ({
+        id: el.user.id,
+        email: el.user.email,
+        nickName: el.user.nickName,
+      })),
+    };
   }
 
   @Role(RoleEnum.MANAGER)
   @Post()
-  async createProject(
+  createProject(
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     createProjectDto: CreateProjectDto,
   ) {
@@ -51,7 +62,7 @@ export class ProjectController {
 
   @Role(RoleEnum.MANAGER)
   @Patch(':id')
-  async editProject(
+  editProject(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     editProjectDto: EditProjectDto,
@@ -62,7 +73,9 @@ export class ProjectController {
   @Role(RoleEnum.MANAGER)
   @Delete(':id')
   async deleteProject(@Param('id', ParseIntPipe) id: number) {
-    return this.projectService.deleteProject(id);
+    await this.projectService.deleteProject(id);
+
+    return { success: true, message: 'Project deleted' };
   }
 
   @Role(RoleEnum.MANAGER)
@@ -72,7 +85,8 @@ export class ProjectController {
     @Param('userId', ParseIntPipe) userId: number,
   ) {
     await this.projectService.addUserToProject(id, userId);
-    return { message: 'User added to project' };
+
+    return { success: true, message: 'User added to project' };
   }
 
   @Role(RoleEnum.MANAGER)
@@ -82,45 +96,105 @@ export class ProjectController {
     @Param('userId', ParseIntPipe) userId: number,
   ) {
     await this.projectService.removeUserFromProject(id, userId);
-    return { message: 'User removed from project' };
+
+    return { success: true, message: 'User removed from project' };
   }
 
+  @UseGuards(ProjectAccessGuard)
   @Get(':id/tasks')
   async getProjectTasks(@Param('id', ParseIntPipe) projectId: number) {
     const tasks = await this.taskService.getTasks(projectId);
+
     return tasks.map((task) => {
-      const { projectId, createdAt, updatedAt, ...rest } = task;
-      return rest;
+      return {
+        id: task.id,
+        title: task.title,
+        deadline: task.deadline,
+        status: task.status,
+        priority: task.priority,
+        assignedTo: {
+          id: task.assignedTo.id,
+          email: task.assignedTo.email,
+          nickName: task.assignedTo.nickName,
+        },
+      };
     });
   }
 
+  @UseGuards(ProjectAccessGuard)
   @Post(':id/tasks')
   async createProjectTask(
-    @Param('id', ParseIntPipe) projectId: number,
+    @Param('id', ParseIntPipe) project: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     createTaskDto: CreateTaskDto,
     @User() user: UserInSession,
   ) {
-    return this.taskService.createTask(createTaskDto, user.id, projectId);
+    const { createdById, assignedToId, projectId, ...task } =
+      await this.taskService.createTask(createTaskDto, user.id, project);
+
+    return {
+      ...task,
+      project: {
+        id: task.project.id,
+        name: task.project.name,
+      },
+      createdBy: {
+        id: task.createdBy.id,
+        email: task.createdBy.email,
+        nickName: task.createdBy.nickName,
+      },
+      assignedTo: {
+        id: task.assignedTo.id,
+        email: task.assignedTo.email,
+        nickName: task.assignedTo.nickName,
+      },
+    };
   }
 
+  @UseGuards(ProjectAccessGuard)
   @Get(':id/comments')
-  getComments(@Param('id', ParseIntPipe) projectId: number) {
-    return this.commentService.getComments(projectId, 'Project');
+  async getComments(@Param('id', ParseIntPipe) projectId: number) {
+    const comments = await this.commentService.getComments(
+      projectId,
+      'Project',
+    );
+
+    return comments.map((comment) => ({
+      id: comment.id,
+      description: comment.description,
+      createdBy: {
+        id: comment.createdBy.id,
+        email: comment.createdBy.email,
+        nickName: comment.createdBy.nickName,
+      },
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    }));
   }
 
+  @UseGuards(ProjectAccessGuard)
   @Post(':id/comments')
-  createComment(
+  async createComment(
     @Param('id', ParseIntPipe) projectId: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     createCommentDto: CreateCommentDto,
     @User() user: UserInSession,
   ) {
-    return this.commentService.createComment(
-      createCommentDto,
-      user.id,
-      projectId,
-      'Project',
-    );
+    const { createdById, commentableType, commentableId, ...comment } =
+      await this.commentService.createComment(
+        createCommentDto,
+        user.id,
+        projectId,
+        'Project',
+      );
+
+    return {
+      ...comment,
+      createdBy: {
+        id: comment.createdBy.id,
+        email: comment.createdBy.email,
+        nickName: comment.createdBy.nickName,
+      },
+    };
   }
 }

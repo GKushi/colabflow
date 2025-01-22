@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.use(
     session({
       secret: process.env.SESSION_SECRET || 'example-secret',
@@ -21,6 +22,8 @@ async function bootstrap() {
       }),
     }),
   );
+
   await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();

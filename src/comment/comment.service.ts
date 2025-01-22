@@ -26,6 +26,7 @@ export class CommentService {
 
     return this.prismaService.comment.findMany({
       where: { commentableId, commentableType },
+      include: { createdBy: true },
     });
   }
 
@@ -61,6 +62,7 @@ export class CommentService {
           connect: { id: userId },
         },
       },
+      include: { createdBy: true },
     });
   }
 

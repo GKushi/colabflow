@@ -32,7 +32,9 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     const { password, ...userData } = registerDto;
+
     const passwordHash = await this.hashPassword(password);
+
     const createdUser = await this.userService.createUser({
       ...userData,
       passwordHash,
@@ -52,17 +54,22 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const foundUser = await this.userService.findUserByEmail(loginDto.email);
+
     if (!foundUser) throw new UnauthorizedException('Invalid credentials');
+
     if (
       !(await this.comparePassword(loginDto.password, foundUser.passwordHash))
     )
       throw new UnauthorizedException('Invalid credentials');
+
     return foundUser;
   }
 
   async sendVerificationToken(userId: number) {
     const user = await this.userService.findUserById(userId);
+
     if (!user) throw new NotFoundException('User not found');
+
     if (user.emailVerified)
       throw new BadRequestException('Email already verified');
 
@@ -76,6 +83,7 @@ export class AuthService {
     const foundUser = await this.userService.findUserByEmail(
       forgotPasswordDto.email,
     );
+
     if (!foundUser) throw new NotFoundException('User not found');
 
     await this.verificationService.createAndSendPasswordResetToken(
@@ -86,11 +94,13 @@ export class AuthService {
 
   async verify(token: string) {
     const userId = await this.verificationService.verifyToken(token);
+
     await this.userService.activateUser(userId);
   }
 
   async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
     const userId = await this.verificationService.verifyToken(token);
+
     await this.userService.updateUser(userId, {
       passwordHash: await this.hashPassword(resetPasswordDto.password),
     });
@@ -103,6 +113,7 @@ export class AuthService {
       );
 
     const user = await this.userService.findUserById(userId);
+
     if (!user) throw new NotFoundException('User not found');
 
     if (

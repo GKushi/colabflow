@@ -32,14 +32,9 @@ export class AuthController {
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     registerDto: RegisterDto,
   ) {
-    const createdUser = await this.authService.register(registerDto);
-    return {
-      id: createdUser.id,
-      nickName: createdUser.nickName,
-      firstName: createdUser.firstName,
-      lastName: createdUser.lastName,
-      email: createdUser.email,
-    };
+    await this.authService.register(registerDto);
+
+    return { success: true, message: 'User registered' };
   }
 
   @Post('login')
@@ -55,6 +50,7 @@ export class AuthController {
     session.user = {
       id: loggedUser.id,
       email: loggedUser.email,
+      role: loggedUser.role,
     };
 
     session.isAuthenticated = true;
@@ -70,10 +66,10 @@ export class AuthController {
   @NoVerification()
   @HttpCode(HttpStatus.OK)
   async logout(@Session() session: SessionWithUser) {
-    return new Promise<{ message: string }>((res, rej) => {
+    return new Promise<{ success: true; message: string }>((res, rej) => {
       session.destroy((err) => {
         if (err) rej(err);
-        res({ message: 'Logged out' });
+        res({ success: true, message: 'Logged out' });
       });
     });
   }
@@ -82,14 +78,16 @@ export class AuthController {
   @NoVerification()
   async sendVerificationToken(@User() user: UserInSession) {
     await this.authService.sendVerificationToken(user.id);
-    return { message: 'Verification token sent' };
+
+    return { success: true, message: 'Verification token sent' };
   }
 
   @Get('verify/:token')
   @Public()
   async verify(@Param('token') token: string) {
     await this.authService.verify(token);
-    return { message: 'Email verified' };
+
+    return { success: true, message: 'Email verified' };
   }
 
   @Post('forgot-password')
@@ -104,7 +102,8 @@ export class AuthController {
     } catch {
       console.error('Failed to send password reset token');
     }
-    return { message: 'Password reset token sent' };
+
+    return { success: true, message: 'Password reset token sent' };
   }
 
   @Post('reset-password/:token')
@@ -116,7 +115,8 @@ export class AuthController {
     resetPasswordDto: ResetPasswordDto,
   ) {
     await this.authService.resetPassword(token, resetPasswordDto);
-    return { message: 'Password reset' };
+
+    return { success: true, message: 'Password reset' };
   }
 
   @Post('change-password')
@@ -128,6 +128,7 @@ export class AuthController {
     changePasswordDto: ChangePasswordDto,
   ) {
     await this.authService.changePassword(changePasswordDto, user.id);
-    return { message: 'Password changed' };
+
+    return { success: true, message: 'Password changed' };
   }
 }

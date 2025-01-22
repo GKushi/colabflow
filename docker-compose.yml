@@ -7,7 +7,7 @@ services:
       - .env
 
   app:
-    image: node:iron-alpine
+    image: node:iron-alpine3.20
     volumes:
       - .:/app
     working_dir: /app

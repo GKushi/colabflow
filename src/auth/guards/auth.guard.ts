@@ -18,8 +18,11 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     if (this.reflector.get<true | undefined>('public', context.getHandler()))
       return true;
+
     const request: Request = context.switchToHttp().getRequest();
+
     const session: SessionWithUser = request.session;
+
     if (!session?.isAuthenticated || !session?.user?.id)
       throw new UnauthorizedException('Please log in');
 

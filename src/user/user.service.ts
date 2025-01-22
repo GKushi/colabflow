@@ -6,6 +6,7 @@ import { CreateUserData } from './interfaces';
 @Injectable()
 export class UserService {
   constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
+
   async createUser(user: CreateUserData) {
     try {
       return await this.prismaService.user.create({ data: user });
@@ -16,6 +17,7 @@ export class UserService {
             'User with this credentials already exists',
           );
       }
+
       throw e;
     }
   }

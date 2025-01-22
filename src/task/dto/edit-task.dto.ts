@@ -11,10 +11,6 @@ import { Status, Priority } from '@prisma/client';
 export class EditTaskDto {
   @IsNumber()
   @IsOptional()
-  project?: number;
-
-  @IsNumber()
-  @IsOptional()
   assignedTo?: number;
 
   @IsString()
