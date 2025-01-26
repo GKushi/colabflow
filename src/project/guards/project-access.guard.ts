@@ -25,10 +25,7 @@ export class ProjectAccessGuard implements CanActivate {
       throw new UnauthorizedException('User not found');
     }
 
-    await this.projectService.checkIfUserCanAccessProject(
-      session.user,
-      projectId,
-    );
+    await this.projectService.checkAccess(session.user, projectId);
 
     return true;
   }

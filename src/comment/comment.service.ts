@@ -3,26 +3,46 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ProjectService } from '../project/project.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CommentableType, Prisma } from '@prisma/client';
 import { CreateCommentDto, EditCommentDto } from './dto';
-import { CommentableType } from '@prisma/client';
+import { TaskService } from '../task/task.service';
+import { UserInSession } from '../auth/interfaces';
 
 @Injectable()
 export class CommentService {
-  private readonly commentableMap: Record<CommentableType, any> = {
-    Project: this.prismaService.project,
-    Task: this.prismaService.task,
+  private readonly commentableMap = {
+    Project: this.projectService,
+    Task: this.taskService,
   };
 
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private projectService: ProjectService,
+    private taskService: TaskService,
+  ) {}
+
+  async checkReadAccess(user: UserInSession, commentId: number) {
+    const comment = await this.getOne(commentId);
+
+    await this.commentableMap[comment.commentableType].checkAccess(
+      user,
+      comment.commentableId,
+    );
+  }
+
+  async checkModifyAccess(user: UserInSession, commentId: number) {
+    if (user.role === 'ADMIN') return;
+
+    const comment = await this.getOne(commentId);
+
+    if (comment.createdById !== user.id)
+      throw new ForbiddenException('You are not the creator of this comment');
+  }
 
   async getComments(commentableId: number, commentableType: CommentableType) {
-    const commentable = await this.commentableMap[commentableType].findUnique({
-      where: { id: commentableId },
-    });
-
-    if (!commentable)
-      throw new NotFoundException(`${commentableType} not found`);
+    await this.commentableMap[commentableType].getOne(commentableId);
 
     return this.prismaService.comment.findMany({
       where: { commentableId, commentableType },
@@ -30,9 +50,10 @@ export class CommentService {
     });
   }
 
-  async getComment(id: number) {
+  async getOne(id: number) {
     const comment = await this.prismaService.comment.findUnique({
       where: { id },
+      include: { createdBy: true },
     });
 
     if (!comment) throw new NotFoundException('Comment not found');
@@ -46,12 +67,7 @@ export class CommentService {
     commentableId: number,
     commentableType: CommentableType,
   ) {
-    const commentable = await this.commentableMap[commentableType].findUnique({
-      where: { id: commentableId },
-    });
-
-    if (!commentable)
-      throw new NotFoundException(`${commentableType} not found`);
+    await this.commentableMap[commentableType].getOne(commentableId);
 
     return this.prismaService.comment.create({
       data: {
@@ -66,48 +82,33 @@ export class CommentService {
     });
   }
 
-  async editComment(
-    id: number,
-    editCommentDto: EditCommentDto,
-    userId: number,
-  ) {
-    const comment = await this.prismaService.comment.findUnique({
-      where: { id },
-    });
+  async editComment(id: number, editCommentDto: EditCommentDto) {
+    try {
+      return await this.prismaService.comment.update({
+        where: { id },
+        data: editCommentDto,
+        include: { createdBy: true },
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025')
+          throw new NotFoundException('Comment not found');
+      }
 
-    if (!comment) throw new NotFoundException('Comment not found');
-
-    const user = await this.prismaService.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    if (comment.createdById !== userId && user.role !== 'ADMIN')
-      throw new ForbiddenException('You are not the creator of this comment');
-
-    return this.prismaService.comment.update({
-      where: { id },
-      data: editCommentDto,
-    });
+      throw e;
+    }
   }
 
-  async deleteComment(id: number, userId: number) {
-    const comment = await this.prismaService.comment.findUnique({
-      where: { id },
-    });
+  async deleteComment(id: number) {
+    try {
+      return await this.prismaService.comment.delete({ where: { id } });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === 'P2025')
+          throw new NotFoundException('Comment not found');
+      }
 
-    if (!comment) throw new NotFoundException('Comment not found');
-
-    const user = await this.prismaService.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    if (comment.createdById !== userId && user.role !== 'ADMIN')
-      throw new ForbiddenException('You are not the creator of this comment');
-
-    return this.prismaService.comment.delete({ where: { id } });
+      throw e;
+    }
   }
 }

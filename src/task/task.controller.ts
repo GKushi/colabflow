@@ -29,7 +29,7 @@ export class TaskController {
   @Get(':id')
   async getTask(@Param('id', ParseIntPipe) id: number) {
     const { projectId, assignedToId, createdById, ...task } =
-      await this.taskService.getTask(id);
+      await this.taskService.getOne(id);
 
     return {
       ...task,

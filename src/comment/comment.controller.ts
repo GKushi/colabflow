@@ -6,10 +6,11 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { User } from 'src/auth/decorators/user.decorator';
-import { UserInSession } from 'src/auth/interfaces';
+import { CommentModifyAccessGuard } from './guards/comment-modify-access.guard';
+import { CommentReadAccessGuard } from './guards/comment-read-access.guard';
 import { CommentService } from './comment.service';
 import { EditCommentDto } from './dto';
 
@@ -17,26 +18,46 @@ import { EditCommentDto } from './dto';
 export class CommentController {
   constructor(private commentService: CommentService) {}
 
+  @UseGuards(CommentReadAccessGuard)
   @Get(':id')
-  getComment(@Param('id', ParseIntPipe) id: number) {
-    return this.commentService.getComment(id);
+  async getComment(@Param('id', ParseIntPipe) id: number) {
+    const { createdById, commentableType, commentableId, ...comment } =
+      await this.commentService.getOne(id);
+
+    return {
+      ...comment,
+      createdBy: {
+        id: comment.createdBy.id,
+        email: comment.createdBy.email,
+        nickName: comment.createdBy.nickName,
+      },
+    };
   }
 
+  @UseGuards(CommentModifyAccessGuard)
   @Patch(':id')
-  editComment(
+  async editComment(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     editCommentDto: EditCommentDto,
-    @User() user: UserInSession,
   ) {
-    return this.commentService.editComment(id, editCommentDto, user.id);
+    const { createdById, commentableType, commentableId, ...comment } =
+      await this.commentService.editComment(id, editCommentDto);
+
+    return {
+      ...comment,
+      createdBy: {
+        id: comment.createdBy.id,
+        email: comment.createdBy.email,
+        nickName: comment.createdBy.nickName,
+      },
+    };
   }
 
+  @UseGuards(CommentModifyAccessGuard)
   @Delete(':id')
-  deleteComment(
-    @Param('id', ParseIntPipe) id: number,
-    @User() user: UserInSession,
-  ) {
-    return this.commentService.deleteComment(id, user.id);
+  async deleteComment(@Param('id', ParseIntPipe) id: number) {
+    await this.commentService.deleteComment(id);
+    return { success: true, message: 'Comment deleted' };
   }
 }

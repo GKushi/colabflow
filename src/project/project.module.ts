@@ -8,6 +8,6 @@ import { TaskModule } from '../task/task.module';
   providers: [ProjectService],
   controllers: [ProjectController],
   exports: [ProjectService],
-  imports: [forwardRef(() => TaskModule), CommentModule],
+  imports: [forwardRef(() => TaskModule), forwardRef(() => CommentModule)],
 })
 export class ProjectModule {}

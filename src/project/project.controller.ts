@@ -39,7 +39,7 @@ export class ProjectController {
   @UseGuards(ProjectAccessGuard)
   @Get(':id')
   async getProject(@Param('id', ParseIntPipe) id: number) {
-    const project = await this.projectService.getProject(id);
+    const project = await this.projectService.getOne(id);
 
     return {
       ...project,

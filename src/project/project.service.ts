@@ -13,7 +13,7 @@ import { Prisma } from '@prisma/client';
 export class ProjectService {
   constructor(private prismaService: PrismaService) {}
 
-  async checkIfUserCanAccessProject(user: UserInSession, projectId: number) {
+  async checkAccess(user: UserInSession, projectId: number) {
     const project = await this.prismaService.project.findUnique({
       where: { id: projectId },
       include: { users: { select: { user: true } } },
@@ -36,7 +36,7 @@ export class ProjectService {
     return this.prismaService.project.findMany();
   }
 
-  async getProject(id: number) {
+  async getOne(id: number) {
     const project = await this.prismaService.project.findUnique({
       where: { id },
       include: { users: { select: { user: true } } },

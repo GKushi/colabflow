@@ -17,10 +17,10 @@ export class TaskService {
     private projectService: ProjectService,
   ) {}
 
-  async checkIfUserCanAccessTask(user: UserInSession, taskId: number) {
-    const task = await this.getTask(taskId);
+  async checkAccess(user: UserInSession, taskId: number) {
+    const task = await this.getOne(taskId);
 
-    await this.projectService.checkIfUserCanAccessProject(user, task.projectId);
+    await this.projectService.checkAccess(user, task.projectId);
   }
 
   getTasks(projectId: number) {
@@ -36,7 +36,7 @@ export class TaskService {
     });
   }
 
-  async getTask(id: number) {
+  async getOne(id: number) {
     const task = await this.prismaService.task.findUnique({
       where: { id },
       include: { project: true, assignedTo: true, createdBy: true },
@@ -52,7 +52,7 @@ export class TaskService {
     userId: number,
     projectId: number,
   ) {
-    const project = await this.projectService.getProject(projectId);
+    const project = await this.projectService.getOne(projectId);
 
     if (!project.users.some((el) => el.user.id === createTaskDto.assignedTo))
       throw new ForbiddenException('User is not in this project');
@@ -95,9 +95,9 @@ export class TaskService {
   async editTask(id: number, editTaskDto: EditTaskDto) {
     const { assignedTo, ...editTaskProps } = editTaskDto;
 
-    const task = await this.getTask(id);
+    const task = await this.getOne(id);
 
-    const fetchedProject = await this.projectService.getProject(task.projectId);
+    const fetchedProject = await this.projectService.getOne(task.projectId);
 
     if (
       assignedTo &&
