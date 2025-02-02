@@ -104,6 +104,15 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - CI/CD pipelines using GitHub Actions or Jenkins
 - Deployment on AWS ECS or Kubernetes
 
+## Temporary Todo list
+
+- [x] Check if roles are working properly
+- [x] Comments are not deleted after task/project deletion
+- [ ] Ensure that comments are deleted after user deletion
+- [ ] Refinements
+  - [ ] Add some optional database fields (e.g. assignedUser in Task model)
+  - [x] Authorization checks for specific actions (e.g. only project members can add and see its tasks)
+
 ## Todo list
 
 - [x] User Module
@@ -256,7 +265,3 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [ ] Documentation
   - [x] Write comprehensive README with setup instructions
   - [ ] Document codebase and architecture decisions
-
-- [ ] Refinements
-  - [ ] Add some optional database fields (e.g. assignedUser in Task model)
-  - [ ] Authorization checks for specific actions (e.g. only project members can add and see its tasks)

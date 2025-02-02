@@ -127,7 +127,13 @@ export class TaskService {
 
   async deleteTask(id: number) {
     try {
-      return await this.prismaService.task.delete({ where: { id } });
+      return await this.prismaService.$transaction([
+        this.prismaService.task.delete({ where: { id } }),
+        this.prismaService.comment.deleteMany({
+          where: { commentableId: id, commentableType: 'Task' },
+        }),
+      ]);
+      //return await this.prismaService.task.delete({ where: { id } });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')

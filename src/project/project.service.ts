@@ -71,7 +71,13 @@ export class ProjectService {
 
   async deleteProject(id: number) {
     try {
-      await this.prismaService.project.delete({ where: { id } });
+      //await this.prismaService.project.delete({ where: { id } });
+      await this.prismaService.$transaction([
+        this.prismaService.project.delete({ where: { id } }),
+        this.prismaService.comment.deleteMany({
+          where: { commentableId: id, commentableType: 'Project' },
+        }),
+      ]);
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
