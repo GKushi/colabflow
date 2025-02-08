@@ -3,20 +3,26 @@ import {
   Controller,
   Delete,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Patch,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { ProjectAccessGuard } from './guards/project-access.guard';
 import { CommentService } from '../comment/comment.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { CreateProjectDto, EditProjectDto } from './dto';
 import { TaskService } from '../task/task.service';
+import { FileService } from '../file/file.service';
 import { UserInSession } from '../auth/interfaces';
 import { ProjectService } from './project.service';
 import { CreateCommentDto } from '../comment/dto';
@@ -29,6 +35,7 @@ export class ProjectController {
     private projectService: ProjectService,
     private taskService: TaskService,
     private commentService: CommentService,
+    private fileService: FileService,
   ) {}
 
   @Get()
@@ -194,6 +201,57 @@ export class ProjectController {
         id: comment.createdBy.id,
         email: comment.createdBy.email,
         nickName: comment.createdBy.nickName,
+      },
+    };
+  }
+
+  @UseGuards(ProjectAccessGuard)
+  @Get(':id/files')
+  async getFiles(@Param('id', ParseIntPipe) projectId: number) {
+    const files = await this.fileService.getFiles(projectId, 'Project');
+
+    return files.map((file) => ({
+      ...file,
+      createdById: undefined,
+      fileableId: undefined,
+      fileableType: undefined,
+      createdBy: {
+        id: file.createdBy.id,
+        email: file.createdBy.email,
+        nickName: file.createdBy.nickName,
+      },
+    }));
+  }
+
+  @UseGuards(ProjectAccessGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @Post(':id/files')
+  async createFile(
+    @Param('id', ParseIntPipe) projectId: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 2000 })],
+      }),
+    )
+    uploadedFile: Express.Multer.File,
+    @User() user: UserInSession,
+  ) {
+    const file = await this.fileService.createFile(
+      uploadedFile,
+      user.id,
+      projectId,
+      'Project',
+    );
+
+    return {
+      ...file,
+      fileableId: undefined,
+      fileableType: undefined,
+      createdById: undefined,
+      createdBy: {
+        id: file.createdBy.id,
+        email: file.createdBy.email,
+        nickName: file.createdBy.nickName,
       },
     };
   }

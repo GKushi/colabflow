@@ -9,11 +9,17 @@ import {
   Delete,
   Post,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
 import { TaskAccessGuard } from './guards/task-access.guard';
 import { CommentService } from '../comment/comment.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from '../auth/decorators/user.decorator';
 import type { UserInSession } from '../auth/interfaces';
+import { FileService } from '../file/file.service';
 import { CreateCommentDto } from '../comment/dto';
 import { TaskService } from './task.service';
 import { EditTaskDto } from './dto';
@@ -24,6 +30,7 @@ export class TaskController {
   constructor(
     private taskService: TaskService,
     private commentService: CommentService,
+    private fileService: FileService,
   ) {}
 
   @Get(':id')
@@ -123,6 +130,55 @@ export class TaskController {
         id: comment.createdBy.id,
         email: comment.createdBy.email,
         nickName: comment.createdBy.nickName,
+      },
+    };
+  }
+
+  @Get(':id/files')
+  async getFiles(@Param('id', ParseIntPipe) taskId: number) {
+    const files = await this.fileService.getFiles(taskId, 'Task');
+
+    return files.map((file) => ({
+      ...file,
+      createdById: undefined,
+      fileableId: undefined,
+      fileableType: undefined,
+      createdBy: {
+        id: file.createdBy.id,
+        email: file.createdBy.email,
+        nickName: file.createdBy.nickName,
+      },
+    }));
+  }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @Post(':id/files')
+  async createFile(
+    @Param('id', ParseIntPipe) taskId: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 2000 })],
+      }),
+    )
+    uploadedFile: Express.Multer.File,
+    @User() user: UserInSession,
+  ) {
+    const file = await this.fileService.createFile(
+      uploadedFile,
+      user.id,
+      taskId,
+      'Task',
+    );
+
+    return {
+      ...file,
+      fileableId: undefined,
+      fileableType: undefined,
+      createdById: undefined,
+      createdBy: {
+        id: file.createdBy.id,
+        email: file.createdBy.email,
+        nickName: file.createdBy.nickName,
       },
     };
   }

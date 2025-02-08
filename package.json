@@ -23,6 +23,8 @@
     "db:seed": "ts-node src/seed/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.740.0",
+    "@aws-sdk/s3-request-presigner": "^3.744.0",
     "@faker-js/faker": "^9.3.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.3.0",
@@ -47,6 +49,7 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.0",
     "@types/jest": "^29.5.2",
+    "@types/multer": "^1.4.12",
     "@types/node": "^20.3.1",
     "@types/nodemailer": "^6.4.17",
     "@types/supertest": "^6.0.0",

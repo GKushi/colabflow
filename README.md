@@ -108,6 +108,9 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [x] Check if roles are working properly
 - [x] Comments are not deleted after task/project deletion
+- [ ] Return releated files in "getOne" method of tasks, projects, comments and remove getting related files from their controllers
+- [ ] Only allow !images! to be related with comments
+- [ ] Add files within create and edit comment dto's and remove file upload from the controller
 - [ ] Ensure that comments are deleted after user deletion
 - [ ] Refinements
   - [ ] Add some optional database fields (e.g. assignedUser in Task model)
@@ -164,15 +167,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Create DTOs for comment creation
   - [x] Implement adding comments to tasks
 
-- [ ] File Module
+- [x] File Module
 
-  - [ ] Integrate AWS SDK for S3 operations
-  - [ ] Generate File module, controller, and service
-  - [ ] Define File entity (fields: id, fileName, url, taskId, uploadedBy, uploadedAt)
-  - [ ] Implement file upload functionality for tasks and projects
-  - [ ] Implement secure file storage on AWS S3
-  - [ ] Implement file download and deletion endpoints
-  - [ ] Ensure files are linked to tasks and users in the database
+  - [x] Integrate AWS SDK for S3 operations
+  - [x] Generate File module, controller, and service
+  - [x] Define File entity (fields: id, fileName, url, taskId, uploadedBy, uploadedAt)
+  - [x] Implement file upload functionality for tasks and projects
+  - [x] Implement file download and deletion endpoints
+  - [x] Ensure files are linked to tasks and users in the database
 
 - [ ] Notification Module
 
