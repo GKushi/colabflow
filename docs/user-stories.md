@@ -35,14 +35,16 @@ As a **Team Member**, I want to be able to assign any task to a user so that the
 
 ## Comments
 
-As a **Team Member**, I want to be able to add a comment to a task or project so that I can discuss it with others.
+As a **Team Member**, I want to be able to add a comment with images to a task or project so that I can discuss it with others.
 As a **Team Member**, I want to be able to delete my comment.
 As a **Team Member**, I want to be able to edit my comment so that I can update its details.
 As a **Admin**, I want to be able to manage any comment so that I can moderate the platform.
 
 ## Files
 
-As a **Team Member**, I want to be able to upload a file to a task or project or comment so that I can share it with others.
+As a **Team Member**, I want to be able to upload any files to a task up to 10 at the time, 2GBs, maxiumum 20 files, so that I can share it with others.
+As a **Team Member**, I want to be able to upload any files to a project up to 10 at the time, 2GBs, maxiumum 100 files, so that I can share it with others.
+As a **Team Member**, I want to be able to upload images to a comment up to 2 at the time, 10MBs, maxiumum 2 images, so that I can share it with others.
 As a **Team Member**, I want to be able to delete my file.
 As a **Team Member**, I want to be able to download a file so that I can view it.
 As a **Admin**, I want to be able to manage any file so that I can moderate the platform.

@@ -1,14 +1,23 @@
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import {
+  type Comment,
+  type CommentableType,
+  type File,
+  Prisma,
+  type User,
+} from '@prisma/client';
 import { ProjectService } from '../project/project.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CommentableType, Prisma } from '@prisma/client';
 import { CreateCommentDto, EditCommentDto } from './dto';
+import type { UserInSession } from '../auth/interfaces';
 import { TaskService } from '../task/task.service';
-import { UserInSession } from '../auth/interfaces';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class CommentService {
@@ -21,6 +30,8 @@ export class CommentService {
     private prismaService: PrismaService,
     private projectService: ProjectService,
     private taskService: TaskService,
+    @Inject(forwardRef(() => FileService))
+    private fileService: FileService,
   ) {}
 
   async checkReadAccess(user: UserInSession, commentId: number) {
@@ -33,21 +44,33 @@ export class CommentService {
   }
 
   async checkModifyAccess(user: UserInSession, commentId: number) {
-    if (user.role === 'ADMIN') return;
-
     const comment = await this.getOne(commentId);
+
+    if (user.role === 'ADMIN') return;
 
     if (comment.createdById !== user.id)
       throw new ForbiddenException('You are not the creator of this comment');
   }
 
   async getComments(commentableId: number, commentableType: CommentableType) {
-    await this.commentableMap[commentableType].getOne(commentableId);
-
-    return this.prismaService.comment.findMany({
+    const comments = await this.prismaService.comment.findMany({
       where: { commentableId, commentableType },
       include: { createdBy: true },
     });
+
+    const fullComments: (Comment & { createdBy: User; files: File[] })[] = [];
+
+    for (const comment of comments) {
+      const files = await this.fileService.getFiles(
+        comment.id,
+        'Comment',
+        true,
+      );
+
+      fullComments.push({ ...comment, files });
+    }
+
+    return fullComments;
   }
 
   async getOne(id: number) {
@@ -58,18 +81,19 @@ export class CommentService {
 
     if (!comment) throw new NotFoundException('Comment not found');
 
-    return comment;
+    const files = await this.fileService.getFiles(comment.id, 'Comment', true);
+
+    return { ...comment, files };
   }
 
   async createComment(
     createCommentDto: CreateCommentDto,
+    uploadedFiles: Express.Multer.File[],
     userId: number,
     commentableId: number,
     commentableType: CommentableType,
   ) {
-    await this.commentableMap[commentableType].getOne(commentableId);
-
-    return this.prismaService.comment.create({
+    const comment = await this.prismaService.comment.create({
       data: {
         ...createCommentDto,
         commentableId,
@@ -80,6 +104,19 @@ export class CommentService {
       },
       include: { createdBy: true },
     });
+
+    const files =
+      uploadedFiles.length > 0
+        ? await this.fileService.createFiles(
+            uploadedFiles,
+            userId,
+            comment.id,
+            'Comment',
+            true,
+          )
+        : [];
+
+    return { ...comment, files };
   }
 
   async editComment(id: number, editCommentDto: EditCommentDto) {

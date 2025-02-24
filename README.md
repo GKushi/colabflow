@@ -108,9 +108,12 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [x] Check if roles are working properly
 - [x] Comments are not deleted after task/project deletion
-- [ ] Return releated files in "getOne" method of tasks, projects, comments and remove getting related files from their controllers
-- [ ] Only allow !images! to be related with comments
-- [ ] Add files within create and edit comment dto's and remove file upload from the controller
+- [x] Return releated files in "getOne" method of tasks, projects, comments and remove getting related files from their controllers
+- [x] Only allow !images! to be related with comments
+- [x] Add files within create comment endpoint
+- [x] Addjust user stories for new changes
+- [ ] Ensure that files are deleted after task/project/comment deletion
+- [ ] Go through and check user stories
 - [ ] Ensure that comments are deleted after user deletion
 - [ ] Refinements
   - [ ] Add some optional database fields (e.g. assignedUser in Task model)

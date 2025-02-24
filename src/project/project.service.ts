@@ -1,25 +1,27 @@
 import {
   ConflictException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto, EditProjectDto } from './dto';
 import type { UserInSession } from '../auth/interfaces';
+import { FileService } from '../file/file.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProjectService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    @Inject(forwardRef(() => FileService))
+    private fileService: FileService,
+  ) {}
 
   async checkAccess(user: UserInSession, projectId: number) {
-    const project = await this.prismaService.project.findUnique({
-      where: { id: projectId },
-      include: { users: { select: { user: true } } },
-    });
-
-    if (!project) throw new NotFoundException('Project with this id not found');
+    const project = await this.getOne(projectId);
 
     if (user.role === 'TEAM_MEMBER') {
       if (!project.users.some((el) => el.user.id === user.id))
@@ -44,7 +46,9 @@ export class ProjectService {
 
     if (!project) throw new NotFoundException('Project with this id not found');
 
-    return project;
+    const files = await this.fileService.getFiles(id, 'Project');
+
+    return { ...project, files };
   }
 
   async createProject(createProjectDto: CreateProjectDto) {

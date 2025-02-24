@@ -10,12 +10,12 @@ import { FileService } from './file.service';
 @Module({
   controllers: [FileController],
   providers: [FileService, StorageService],
+  exports: [FileService, StorageService],
   imports: [
     forwardRef(() => TaskModule),
     forwardRef(() => ProjectModule),
     forwardRef(() => CommentModule),
     ConfigModule,
   ],
-  exports: [FileService, StorageService],
 })
 export class FileModule {}

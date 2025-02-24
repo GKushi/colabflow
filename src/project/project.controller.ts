@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   MaxFileSizeValidator,
   Param,
@@ -10,14 +12,14 @@ import {
   Patch,
   Post,
   Put,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { ProjectAccessGuard } from './guards/project-access.guard';
 import { CommentService } from '../comment/comment.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { Role } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
 import { CreateProjectDto, EditProjectDto } from './dto';
@@ -54,6 +56,17 @@ export class ProjectController {
         id: el.user.id,
         email: el.user.email,
         nickName: el.user.nickName,
+      })),
+      files: project.files.map((file) => ({
+        ...file,
+        createdById: undefined,
+        fileableId: undefined,
+        fileableType: undefined,
+        createdBy: {
+          id: file.createdBy.id,
+          email: file.createdBy.email,
+          nickName: file.createdBy.nickName,
+        },
       })),
     };
   }
@@ -136,11 +149,17 @@ export class ProjectController {
     createTaskDto: CreateTaskDto,
     @User() user: UserInSession,
   ) {
-    const { createdById, assignedToId, projectId, ...task } =
-      await this.taskService.createTask(createTaskDto, user.id, project);
+    const task = await this.taskService.createTask(
+      createTaskDto,
+      user.id,
+      project,
+    );
 
     return {
       ...task,
+      createdById: undefined,
+      assignedToId: undefined,
+      projectId: undefined,
       project: {
         id: task.project.id,
         name: task.project.name,
@@ -167,48 +186,99 @@ export class ProjectController {
     );
 
     return comments.map((comment) => ({
-      id: comment.id,
-      description: comment.description,
+      ...comment,
+      createdById: undefined,
+      commentableId: undefined,
+      commentableType: undefined,
       createdBy: {
         id: comment.createdBy.id,
         email: comment.createdBy.email,
         nickName: comment.createdBy.nickName,
       },
-      createdAt: comment.createdAt,
-      updatedAt: comment.updatedAt,
+      files: comment.files.map((file) => ({
+        ...file,
+        createdById: undefined,
+        fileableId: undefined,
+        fileableType: undefined,
+        createdBy: undefined,
+      })),
     }));
   }
 
   @UseGuards(ProjectAccessGuard)
+  @UseInterceptors(FilesInterceptor('file', 2))
   @Post(':id/comments')
   async createComment(
     @Param('id', ParseIntPipe) projectId: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     createCommentDto: CreateCommentDto,
     @User() user: UserInSession,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10485760 }),
+          new FileTypeValidator({ fileType: /^image\/.+$/i }),
+        ],
+        fileIsRequired: false,
+        exceptionFactory: () => {
+          throw new BadRequestException('Invalid file');
+        },
+      }),
+    )
+    uploadedFiles?: Express.Multer.File[],
   ) {
-    const { createdById, commentableType, commentableId, ...comment } =
-      await this.commentService.createComment(
-        createCommentDto,
-        user.id,
-        projectId,
-        'Project',
-      );
+    const comment = await this.commentService.createComment(
+      createCommentDto,
+      uploadedFiles || [],
+      user.id,
+      projectId,
+      'Project',
+    );
 
     return {
       ...comment,
+      createdById: undefined,
+      commentableId: undefined,
+      commentableType: undefined,
       createdBy: {
         id: comment.createdBy.id,
         email: comment.createdBy.email,
         nickName: comment.createdBy.nickName,
       },
+      files: comment.files.map((file) => ({
+        ...file,
+        createdById: undefined,
+        fileableId: undefined,
+        fileableType: undefined,
+        createdBy: undefined,
+      })),
     };
   }
 
   @UseGuards(ProjectAccessGuard)
-  @Get(':id/files')
-  async getFiles(@Param('id', ParseIntPipe) projectId: number) {
-    const files = await this.fileService.getFiles(projectId, 'Project');
+  @UseInterceptors(FilesInterceptor('file', 10))
+  @Post(':id/files')
+  async createFiles(
+    @Param('id', ParseIntPipe) projectId: number,
+    @User() user: UserInSession,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 2147483648 })],
+        fileIsRequired: true,
+        exceptionFactory: () => {
+          throw new BadRequestException('Invalid file');
+        },
+      }),
+    )
+    uploadedFiles: Express.Multer.File[],
+  ) {
+    const files = await this.fileService.createFiles(
+      uploadedFiles,
+      user.id,
+      projectId,
+      'Project',
+      true,
+    );
 
     return files.map((file) => ({
       ...file,
@@ -221,38 +291,5 @@ export class ProjectController {
         nickName: file.createdBy.nickName,
       },
     }));
-  }
-
-  @UseGuards(ProjectAccessGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  @Post(':id/files')
-  async createFile(
-    @Param('id', ParseIntPipe) projectId: number,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 2000 })],
-      }),
-    )
-    uploadedFile: Express.Multer.File,
-    @User() user: UserInSession,
-  ) {
-    const file = await this.fileService.createFile(
-      uploadedFile,
-      user.id,
-      projectId,
-      'Project',
-    );
-
-    return {
-      ...file,
-      fileableId: undefined,
-      fileableType: undefined,
-      createdById: undefined,
-      createdBy: {
-        id: file.createdBy.id,
-        email: file.createdBy.email,
-        nickName: file.createdBy.nickName,
-      },
-    };
   }
 }

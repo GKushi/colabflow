@@ -1,12 +1,15 @@
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { ProjectService } from '../project/project.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UserInSession } from '../auth/interfaces';
+import { FileService } from '../file/file.service';
 import { CreateTaskDto, EditTaskDto } from './dto';
 import { Prisma } from '@prisma/client';
 
@@ -14,7 +17,10 @@ import { Prisma } from '@prisma/client';
 export class TaskService {
   constructor(
     private prismaService: PrismaService,
+    @Inject(forwardRef(() => ProjectService))
     private projectService: ProjectService,
+    @Inject(forwardRef(() => FileService))
+    private fileService: FileService,
   ) {}
 
   async checkAccess(user: UserInSession, taskId: number) {
@@ -44,7 +50,9 @@ export class TaskService {
 
     if (!task) throw new NotFoundException('Task not found');
 
-    return task;
+    const files = await this.fileService.getFiles(task.id, 'Task');
+
+    return { ...task, files };
   }
 
   async createTask(

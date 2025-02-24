@@ -1,11 +1,18 @@
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommentService } from 'src/comment/comment.service';
+import {
+  type FileableType,
+  Prisma,
+  type User,
+  type File,
+} from '@prisma/client';
+import { CommentService } from '../comment/comment.service';
 import { ProjectService } from '../project/project.service';
-import { type FileableType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UserInSession } from '../auth/interfaces';
 import { TaskService } from '../task/task.service';
@@ -19,28 +26,34 @@ interface FileableService {
 
 @Injectable()
 export class FileService {
-  private readonly fileableMap: Record<FileableType, FileableService> = {
-    Project: this.projectService,
-    Task: this.taskService,
-    Comment: this.commentService,
+  private readonly fileableMap: Record<
+    FileableType,
+    { service: FileableService; limit: number }
+  > = {
+    Project: { service: this.projectService, limit: 100 },
+    Task: { service: this.taskService, limit: 20 },
+    Comment: { service: this.commentService, limit: 2 },
   };
 
   constructor(
     private prismaService: PrismaService,
+    @Inject(forwardRef(() => ProjectService))
     private projectService: ProjectService,
+    @Inject(forwardRef(() => TaskService))
     private taskService: TaskService,
+    @Inject(forwardRef(() => CommentService))
     private commentService: CommentService,
     private storageService: StorageService,
   ) {}
 
   async checkReadAccess(user: UserInSession, fileId: number) {
     const file = await this.getOne(fileId);
-    const service = this.fileableMap[file.fileableType];
+    const fileable = this.fileableMap[file.fileableType];
 
-    if (service.checkAccess) {
-      await service.checkAccess(user, file.fileableId);
-    } else if (service.checkReadAccess) {
-      await service.checkReadAccess(user, file.fileableId);
+    if (fileable.service.checkAccess) {
+      await fileable.service.checkAccess(user, file.fileableId);
+    } else if (fileable.service.checkReadAccess) {
+      await fileable.service.checkReadAccess(user, file.fileableId);
     } else {
       throw new Error(
         `No access check method found for type ${file.fileableType}`,
@@ -49,21 +62,45 @@ export class FileService {
   }
 
   async checkModifyAccess(user: UserInSession, fileId: number) {
-    if (user.role === 'ADMIN') return;
-
     const file = await this.getOne(fileId);
+
+    if (user.role === 'ADMIN') return;
 
     if (file.createdById !== user.id)
       throw new ForbiddenException('You are not the creator of this file');
   }
 
-  async getFiles(fileableId: number, fileableType: FileableType) {
-    await this.fileableMap[fileableType].getOne(fileableId);
+  async getFiles(
+    fileableId: number,
+    fileableType: FileableType,
+    withUrl: true,
+  ): Promise<(File & { url: string; createdBy: User })[]>;
+  async getFiles(
+    fileableId: number,
+    fileableType: FileableType,
+    withUrl?: false,
+  ): Promise<(File & { createdBy: User })[]>;
 
-    return this.prismaService.file.findMany({
+  async getFiles(
+    fileableId: number,
+    fileableType: FileableType,
+    withUrl = false,
+  ) {
+    const files = await this.prismaService.file.findMany({
       where: { fileableId, fileableType },
       include: { createdBy: true },
     });
+
+    if (!withUrl) return files;
+
+    const filesWithUrl: (File & { url: string })[] = [];
+
+    for (const file of files) {
+      const url = await this.storageService.getFileUrl(file.fileName);
+      filesWithUrl.push({ ...file, url });
+    }
+
+    return filesWithUrl;
   }
 
   async getOne(id: number) {
@@ -79,28 +116,44 @@ export class FileService {
     return { ...file, url };
   }
 
-  async createFile(
-    file: Express.Multer.File,
+  async createFiles(
+    files: Array<Express.Multer.File>,
     userId: number,
     fileableId: number,
     fileableType: FileableType,
+    withUrl = false,
   ) {
-    await this.fileableMap[fileableType].getOne(fileableId);
+    await this.checkFileLimit(fileableId, fileableType, files.length);
 
-    const fileName = await this.storageService.uploadFile(file);
+    const createdFiles: (File & {
+      createdBy: User;
+      url?: string;
+    })[] = [];
 
-    return this.prismaService.file.create({
-      data: {
-        fileName: fileName,
-        mimeType: file.mimetype,
-        fileableType,
-        fileableId,
-        createdBy: {
-          connect: { id: userId },
+    for (const file of files) {
+      const fileName = await this.storageService.uploadFile(file);
+
+      const url = withUrl
+        ? await this.storageService.getFileUrl(fileName)
+        : undefined;
+
+      const createdFile = await this.prismaService.file.create({
+        data: {
+          fileName: fileName,
+          mimeType: file.mimetype,
+          fileableType,
+          fileableId,
+          createdBy: {
+            connect: { id: userId },
+          },
         },
-      },
-      include: { createdBy: true },
-    });
+        include: { createdBy: true },
+      });
+
+      createdFiles.push({ ...createdFile, url });
+    }
+
+    return createdFiles;
   }
 
   async deleteFile(id: number) {
@@ -115,5 +168,20 @@ export class FileService {
 
       throw e;
     }
+  }
+
+  private async checkFileLimit(
+    fileableId: number,
+    fileableType: FileableType,
+    newFiles: number,
+  ) {
+    const fileable = this.fileableMap[fileableType];
+
+    const files = await this.prismaService.file.count({
+      where: { fileableId, fileableType },
+    });
+
+    if (files + newFiles > fileable.limit)
+      throw new ForbiddenException('File limit exceeded');
   }
 }
