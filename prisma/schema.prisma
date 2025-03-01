@@ -58,7 +58,7 @@ model Task {
   status       Status
   priority     Priority
   deadline     DateTime
-  project      Project  @relation("ProjectTask", fields: [projectId], references: [id], onDelete: Cascade)
+  project      Project  @relation("ProjectTask", fields: [projectId], references: [id])
   projectId    Int
   assignedTo   User     @relation("AssignedTask", fields: [assignedToId], references: [id])
   assignedToId Int

@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ProjectService } from '../project/project.service';
+import { CommentService } from '../comment/comment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
@@ -21,6 +22,8 @@ export class TaskService {
     private projectService: ProjectService,
     @Inject(forwardRef(() => FileService))
     private fileService: FileService,
+    @Inject(forwardRef(() => CommentService))
+    private commentService: CommentService,
   ) {}
 
   async checkAccess(user: UserInSession, taskId: number) {
@@ -135,13 +138,15 @@ export class TaskService {
 
   async deleteTask(id: number) {
     try {
-      return await this.prismaService.$transaction([
-        this.prismaService.task.delete({ where: { id } }),
-        this.prismaService.comment.deleteMany({
-          where: { commentableId: id, commentableType: 'Task' },
-        }),
-      ]);
-      //return await this.prismaService.task.delete({ where: { id } });
+      const deletedTask = await this.prismaService.task.delete({
+        where: { id },
+      });
+
+      await this.fileService.deleteFiles(id, 'Task');
+
+      await this.commentService.deleteComments(id, 'Task');
+
+      return deletedTask;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
@@ -149,6 +154,20 @@ export class TaskService {
       }
 
       throw e;
+    }
+  }
+
+  async deleteTasks(projectId: number) {
+    const tasks = await this.prismaService.task.findMany({
+      where: {
+        project: {
+          id: projectId,
+        },
+      },
+    });
+
+    for (const task of tasks) {
+      await this.deleteTask(task.id);
     }
   }
 }

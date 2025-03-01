@@ -14,7 +14,7 @@ export class SeedService {
 
   constructor(private prismaService: PrismaService) {}
 
-  async run() {
+  async run(withFiles = false) {
     await this.seedUsers(this.UserCount);
     await this.seedProjects(this.ProjectCount);
     await this.linkProjects(this.UserCount, this.ProjectCount);

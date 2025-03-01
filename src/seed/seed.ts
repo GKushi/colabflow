@@ -5,7 +5,8 @@ import { NestFactory } from '@nestjs/core';
 async function bootstrap() {
   const app = await NestFactory.create(SeedModule);
   const seedService = app.get(SeedService);
-  await seedService.run();
+  const withFiles = process.argv.includes('files');
+  await seedService.run(withFiles);
   await app.close();
 }
 

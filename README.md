@@ -112,7 +112,7 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [x] Only allow !images! to be related with comments
 - [x] Add files within create comment endpoint
 - [x] Addjust user stories for new changes
-- [ ] Ensure that files are deleted after task/project/comment deletion
+- [x] Ensure that files are deleted after task/project/comment deletion
 - [ ] Go through and check user stories
 - [ ] Ensure that comments are deleted after user deletion
 - [ ] Refinements

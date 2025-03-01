@@ -13,7 +13,6 @@ import { TaskService } from './task.service';
     forwardRef(() => ProjectModule),
     forwardRef(() => CommentModule),
     forwardRef(() => FileModule),
-    forwardRef(() => TaskModule),
   ],
 })
 export class TaskModule {}

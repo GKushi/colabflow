@@ -6,10 +6,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { CommentService } from '../comment/comment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto, EditProjectDto } from './dto';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
+import { TaskService } from '../task/task.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -18,6 +20,9 @@ export class ProjectService {
     private prismaService: PrismaService,
     @Inject(forwardRef(() => FileService))
     private fileService: FileService,
+    @Inject(forwardRef(() => CommentService))
+    private commentService: CommentService,
+    private taskService: TaskService,
   ) {}
 
   async checkAccess(user: UserInSession, projectId: number) {
@@ -75,12 +80,17 @@ export class ProjectService {
 
   async deleteProject(id: number) {
     try {
-      await this.prismaService.$transaction([
-        this.prismaService.project.delete({ where: { id } }),
-        this.prismaService.comment.deleteMany({
-          where: { commentableId: id, commentableType: 'Project' },
-        }),
-      ]);
+      await this.taskService.deleteTasks(id);
+
+      const deletedProject = await this.prismaService.project.delete({
+        where: { id },
+      });
+
+      await this.fileService.deleteFiles(id, 'Project');
+
+      await this.commentService.deleteComments(id, 'Project');
+
+      return deletedProject;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')

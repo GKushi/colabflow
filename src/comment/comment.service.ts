@@ -52,11 +52,29 @@ export class CommentService {
       throw new ForbiddenException('You are not the creator of this comment');
   }
 
-  async getComments(commentableId: number, commentableType: CommentableType) {
+  async getComments(
+    commentableId: number,
+    commentableType: CommentableType,
+    files?: true,
+  ): Promise<(Comment & { createdBy: User; files: File[] })[]>;
+
+  async getComments(
+    commentableId: number,
+    commentableType: CommentableType,
+    files: false,
+  ): Promise<(Comment & { createdBy: User })[]>;
+
+  async getComments(
+    commentableId: number,
+    commentableType: CommentableType,
+    files = true,
+  ) {
     const comments = await this.prismaService.comment.findMany({
       where: { commentableId, commentableType },
       include: { createdBy: true },
     });
+
+    if (!files) return comments;
 
     const fullComments: (Comment & { createdBy: User; files: File[] })[] = [];
 
@@ -138,7 +156,13 @@ export class CommentService {
 
   async deleteComment(id: number) {
     try {
-      return await this.prismaService.comment.delete({ where: { id } });
+      const deletedComment = await this.prismaService.comment.delete({
+        where: { id },
+      });
+
+      await this.fileService.deleteFiles(id, 'Comment');
+
+      return deletedComment;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
@@ -146,6 +170,14 @@ export class CommentService {
       }
 
       throw e;
+    }
+  }
+
+  async deleteComments(id: number, commentableType: CommentableType) {
+    const comments = await this.getComments(id, commentableType, false);
+
+    for (const comment of comments) {
+      await this.deleteComment(comment.id);
     }
   }
 }

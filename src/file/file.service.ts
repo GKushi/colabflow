@@ -159,7 +159,9 @@ export class FileService {
   async deleteFile(id: number) {
     try {
       const deleted = await this.prismaService.file.delete({ where: { id } });
+
       await this.storageService.deleteFile(deleted.fileName);
+
       return deleted;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -167,6 +169,14 @@ export class FileService {
       }
 
       throw e;
+    }
+  }
+
+  async deleteFiles(fileableId: number, fileableType: FileableType) {
+    const files = await this.getFiles(fileableId, fileableType);
+
+    for (const file of files) {
+      await this.deleteFile(file.id);
     }
   }
 
