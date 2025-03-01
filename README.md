@@ -115,6 +115,7 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [x] Ensure that files are deleted after task/project/comment deletion
 - [ ] Go through and check user stories
 - [ ] Ensure that comments are deleted after user deletion
+- [ ] Pagination, filtering and sorting for all endpoints
 - [ ] Refinements
   - [ ] Add some optional database fields (e.g. assignedUser in Task model)
   - [x] Authorization checks for specific actions (e.g. only project members can add and see its tasks)
@@ -179,13 +180,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement file download and deletion endpoints
   - [x] Ensure files are linked to tasks and users in the database
 
-- [ ] Notification Module
+- [ ] Messaging Module
 
-  - [ ] Generate Notification module, controller, and service
   - [ ] Define Notification entity (fields: id, type, message, userId, isRead, createdAt)
-  - [ ] Implement email notifications using SendGrid or Nodemailer
+  - [x] Implement email notifications using SendGrid or Nodemailer
   - [ ] Create notification templates for different events (e.g., task assigned, comment added)
-  - [ ] Allow users to manage notification preferences
+  - [ ] Implement in-app notifications with endpoints for getting and marking notifications
+  - [ ] Implement mechanism for clearing old notifications
+  - [ ] Send email notifications for important events (e.g., password reset, project invitation)
 
 - [ ] Chat Module
 
@@ -195,22 +197,6 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Implement chat channels (e.g., general, project-specific)
   - [ ] Persist chat messages in the database
   - [ ] Implement message history retrieval and pagination
-
-- [ ] Search Module
-
-  - [ ] Implement search functionality for projects, tasks, and users
-  - [ ] Implement filters (e.g., by status, priority, assigned user)
-  - [ ] Implement sorting options (e.g., by date, name, priority)
-  - [ ] Implement pagination
-  - [ ] Optimize search queries for performance using indexes
-  - [ ] Consider implementing full-text search capabilities
-
-- [ ] API Documentation
-
-  - [ ] Integrate Swagger using @nestjs/swagger
-  - [ ] Annotate controllers and DTOs with Swagger decorators
-  - [ ] Generate interactive API documentation at /api-docs
-  - [ ] Ensure all endpoints, models, and possible responses are documented
 
 - [ ] Rate Limiting and Throttling
 
@@ -250,13 +236,6 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Implement request logging middleware
   - [ ] Correlate logs with user sessions and requests
 
-- [ ] Email Service
-
-  - [x] Set up email service using SendGrid or SMTP
-  - [ ] Create email templates for various notifications
-  - [ ] Implement email queueing and retry mechanisms
-  - [ ] Handle email bounces and delivery failures
-
 - [ ] Database Management
 
   - [x] Use Prisma migrations for schema changes
@@ -266,7 +245,12 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [ ] Future Enhancements
 
   - [ ] Add two-factor authentication (2FA) for enhanced security
+  - [ ] Allow users to manage notification preferences
 
 - [ ] Documentation
   - [x] Write comprehensive README with setup instructions
   - [ ] Document codebase and architecture decisions
+  - [ ] Integrate Swagger using @nestjs/swagger
+  - [ ] Annotate controllers and DTOs with Swagger decorators
+  - [ ] Generate interactive API documentation at /api-docs
+  - [ ] Ensure all endpoints, models, and possible responses are documented
