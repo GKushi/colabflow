@@ -1,5 +1,12 @@
-import { Priority, Role, Status, CommentableType } from '@prisma/client';
+import {
+  Priority,
+  Role,
+  Status,
+  CommentableType,
+  FileableType,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../file/storage.service';
 import { Injectable } from '@nestjs/common';
 import { faker } from '@faker-js/faker';
 import * as bcrypt from 'bcrypt';
@@ -11,8 +18,12 @@ export class SeedService {
   private readonly ProjectCount = 5;
   private readonly TaskCount = 50;
   private readonly CommentCount = 100;
+  private readonly FileCount = 20;
 
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   async run(withFiles = false) {
     await this.seedUsers(this.UserCount);
@@ -26,6 +37,15 @@ export class SeedService {
       this.TaskCount,
       this.ProjectCount,
     );
+    if (withFiles) {
+      await this.seedFiles(this.FileCount);
+      await this.linkFiles(
+        this.FileCount,
+        this.CommentCount,
+        this.TaskCount,
+        this.ProjectCount,
+      );
+    }
   }
 
   private getLatestIds<T extends { findMany: (options: any) => Promise<any> }>(
@@ -272,6 +292,147 @@ export class SeedService {
           createdBy: { connect: { id: createdBy } },
           commentableId,
           commentableType,
+        },
+      });
+    }
+  }
+
+  private async seedFiles(count: number) {
+    const generatedFiles = faker.helpers.multiple(this.generateFile, {
+      count: count,
+    });
+
+    for (const file of generatedFiles) {
+      const filename = await this.storageService.uploadFile(file);
+
+      await this.prismaService.file.create({
+        data: {
+          fileName: filename,
+          mimeType: file.mimetype,
+          fileableType: FileableType.Comment,
+          fileableId: 1,
+          createdBy: { connect: { id: 1 } },
+        },
+      });
+    }
+  }
+
+  private generateFile() {
+    const file = {
+      buffer: Buffer.from(faker.lorem.paragraph()),
+      mimetype: faker.system.mimeType(),
+    } as Express.Multer.File;
+
+    return file;
+  }
+
+  private async linkFiles(
+    fileCount: number,
+    commentCount: number,
+    taskCount: number,
+    projectCount: number,
+  ) {
+    const lastTasksIds = await this.getLatestIds(
+      this.prismaService.task,
+      taskCount,
+    );
+
+    const lastProjectIds = await this.getLatestIds(
+      this.prismaService.project,
+      projectCount,
+    );
+
+    const lastCommentsIds = await this.getLatestIds(
+      this.prismaService.comment,
+      commentCount,
+    );
+
+    const lastFilesIds = await this.getLatestIds(
+      this.prismaService.file,
+      fileCount,
+    );
+
+    for (let i = 0; i < lastFilesIds.length; i++) {
+      const file = await this.prismaService.file.findUnique({
+        where: { id: lastFilesIds[i].id },
+      });
+
+      if (!file) continue;
+
+      const fileableType = /^image\/.+$/i.test(file.mimeType)
+        ? FileableType.Comment
+        : faker.helpers.enumValue({
+            Project: FileableType.Project,
+            Task: FileableType.Task,
+          });
+
+      let fileableId: number | undefined = undefined;
+      let projectId: number | undefined = undefined;
+
+      if (fileableType === FileableType.Task) {
+        fileableId =
+          lastTasksIds[
+            faker.number.int({ min: 0, max: lastTasksIds.length - 1 })
+          ].id;
+
+        projectId = (
+          await this.prismaService.task.findUnique({
+            where: { id: fileableId },
+          })
+        )?.projectId;
+      } else if (fileableType === FileableType.Project) {
+        fileableId =
+          lastProjectIds[
+            faker.number.int({ min: 0, max: lastProjectIds.length - 1 })
+          ].id;
+
+        projectId = fileableId;
+      } else {
+        fileableId =
+          lastCommentsIds[
+            faker.number.int({ min: 0, max: lastCommentsIds.length - 1 })
+          ].id;
+
+        const comment = await this.prismaService.comment.findUnique({
+          where: { id: fileableId },
+        });
+
+        if (!comment) continue;
+
+        projectId =
+          comment.commentableType === CommentableType.Project
+            ? comment.commentableId
+            : (
+                await this.prismaService.task.findUnique({
+                  where: { id: comment.commentableId },
+                })
+              )?.projectId;
+      }
+
+      if (!projectId || !fileableId) continue;
+
+      const projectUsers = await this.prismaService.project.findUnique({
+        where: {
+          id: projectId,
+        },
+        select: { users: { select: { userId: true } } },
+      });
+
+      if (!projectUsers) continue;
+
+      const users = projectUsers.users.map((user) => user.userId);
+
+      const createdBy =
+        users[faker.number.int({ min: 0, max: users.length - 1 })];
+
+      if (!createdBy) continue;
+
+      await this.prismaService.file.update({
+        where: { id: file.id },
+        data: {
+          createdBy: { connect: { id: createdBy } },
+          fileableId,
+          fileableType,
         },
       });
     }
