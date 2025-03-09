@@ -1,4 +1,4 @@
-import { MessagingModule } from '../messaging/messaging.module';
+import { NotificationModule } from '../notification/notification.module';
 import { VerificationService } from './verification.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
@@ -9,6 +9,6 @@ import { Module } from '@nestjs/common';
 @Module({
   providers: [AuthService, VerificationService],
   controllers: [AuthController],
-  imports: [UserModule, MessagingModule, ConfigModule],
+  imports: [UserModule, NotificationModule, ConfigModule],
 })
 export class AuthModule {}

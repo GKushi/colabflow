@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -73,10 +74,16 @@ export class AuthService {
     if (user.emailVerified)
       throw new BadRequestException('Email already verified');
 
-    await this.verificationService.createAndSendEmailVerificationToken(
-      userId,
-      user.email,
-    );
+    try {
+      await this.verificationService.createAndSendEmailVerificationToken(
+        userId,
+        user.email,
+      );
+    } catch {
+      throw new InternalServerErrorException(
+        'Failed to send verification token',
+      );
+    }
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {

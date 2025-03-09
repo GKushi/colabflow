@@ -6,6 +6,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/interfaces';
 import { ProjectService } from '../project/project.service';
 import { CommentService } from '../comment/comment.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,12 +26,21 @@ export class TaskService {
     private fileService: FileService,
     @Inject(forwardRef(() => CommentService))
     private commentService: CommentService,
+    private notificationService: NotificationService,
   ) {}
 
   async checkAccess(user: UserInSession, taskId: number) {
     const task = await this.getOne(taskId);
 
     await this.projectService.checkAccess(user, task.projectId);
+  }
+
+  async getNotifiableUsers(taskId: number) {
+    const task = await this.getOne(taskId);
+
+    if (task.assignedTo.id === task.createdBy.id) return [task.createdBy.id];
+
+    return [task.assignedTo.id, task.createdBy.id];
   }
 
   getTasks(projectId: number) {
@@ -69,7 +80,7 @@ export class TaskService {
       throw new ForbiddenException('User is not in this project');
 
     try {
-      return await this.prismaService.task.create({
+      const newTask = await this.prismaService.task.create({
         data: {
           ...createTaskDto,
           deadline: new Date(createTaskDto.deadline),
@@ -93,6 +104,16 @@ export class TaskService {
           createdBy: true,
         },
       });
+
+      if (newTask.assignedTo.id !== userId)
+        await this.notificationService.createNotification(
+          newTask.assignedTo.id,
+          NotificationType.TaskAssigned,
+          newTask.id,
+          'Task',
+        );
+
+      return newTask;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
@@ -103,7 +124,7 @@ export class TaskService {
     }
   }
 
-  async editTask(id: number, editTaskDto: EditTaskDto) {
+  async editTask(id: number, editTaskDto: EditTaskDto, editorId?: number) {
     const { assignedTo, ...editTaskProps } = editTaskDto;
 
     const task = await this.getOne(id);
@@ -121,11 +142,32 @@ export class TaskService {
       : {};
 
     try {
-      return await this.prismaService.task.update({
+      const updatedTask = await this.prismaService.task.update({
         where: { id },
         data: { ...editTaskProps, ...assignedToField },
         include: { project: true, assignedTo: true, createdBy: true },
       });
+
+      if (assignedTo && updatedTask.assignedTo.id !== editorId)
+        await this.notificationService.createNotification(
+          updatedTask.assignedTo.id,
+          NotificationType.TaskAssigned,
+          updatedTask.id,
+          'Task',
+        );
+
+      if (Object.keys(editTaskProps).length > 0)
+        await this.notificationService.createNotifications(
+          [
+            updatedTask.createdBy.id,
+            ...(assignedTo ? [] : [updatedTask.assignedTo.id]),
+          ].filter((el) => el !== editorId),
+          NotificationType.TaskChanged,
+          updatedTask.id,
+          'Task',
+        );
+
+      return updatedTask;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')

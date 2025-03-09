@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EmailService } from '../messaging/email.service';
+import { EmailService } from '../notification/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { VerificationTokenType } from '@prisma/client';

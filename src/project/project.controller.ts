@@ -86,8 +86,9 @@ export class ProjectController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     editProjectDto: EditProjectDto,
+    @User() user: UserInSession,
   ) {
-    return this.projectService.editProject(id, editProjectDto);
+    return this.projectService.editProject(id, editProjectDto, user.id);
   }
 
   @Role(RoleEnum.MANAGER)
@@ -103,8 +104,9 @@ export class ProjectController {
   async addUserToProject(
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) userId: number,
+    @User() user: UserInSession,
   ) {
-    await this.projectService.addUserToProject(id, userId);
+    await this.projectService.addUserToProject(id, userId, user.id);
 
     return { success: true, message: 'User added to project' };
   }

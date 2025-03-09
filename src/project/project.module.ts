@@ -1,3 +1,4 @@
+import { NotificationModule } from '../notification/notification.module';
 import { CommentModule } from '../comment/comment.module';
 import { ProjectController } from './project.controller';
 import { forwardRef, Module } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { FileModule } from '../file/file.module';
   controllers: [ProjectController],
   exports: [ProjectService],
   imports: [
+    NotificationModule,
     forwardRef(() => TaskModule),
     forwardRef(() => CommentModule),
     forwardRef(() => FileModule),

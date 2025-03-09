@@ -113,12 +113,16 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [x] Add files within create comment endpoint
 - [x] Addjust user stories for new changes
 - [x] Ensure that files are deleted after task/project/comment deletion
+- [x] Properly test implemented notifcication system
+- [ ] Go through and check user permissions
 - [ ] Go through and check user stories
+- [ ] Read about proper error handling and add it for all endpoints
 - [ ] Ensure that comments are deleted after user deletion
 - [ ] Pagination, filtering and sorting for all endpoints
 - [ ] Refinements
   - [ ] Add some optional database fields (e.g. assignedUser in Task model)
   - [x] Authorization checks for specific actions (e.g. only project members can add and see its tasks)
+  - [ ] Add ability to follow tasks for users assigned to project
 
 ## Todo list
 
@@ -180,14 +184,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement file download and deletion endpoints
   - [x] Ensure files are linked to tasks and users in the database
 
-- [ ] Messaging Module
+- [x] Notification Module
 
-  - [ ] Define Notification entity (fields: id, type, message, userId, isRead, createdAt)
+  - [x] Define Notification entity (fields: id, type, message, userId, isRead, createdAt)
   - [x] Implement email notifications using SendGrid or Nodemailer
-  - [ ] Create notification templates for different events (e.g., task assigned, comment added)
-  - [ ] Implement in-app notifications with endpoints for getting and marking notifications
-  - [ ] Implement mechanism for clearing old notifications
-  - [ ] Send email notifications for important events (e.g., password reset, project invitation)
+  - [x] Create notification templates for different events (e.g., task assigned, comment added)
+  - [x] Implement in-app notifications with endpoints for getting and marking notifications
+  - [x] Implement mechanism for clearing old notifications
+  - [x] Send email notifications for important events (e.g., password reset, project invitation)
 
 - [ ] Chat Module
 

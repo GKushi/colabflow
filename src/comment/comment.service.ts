@@ -12,6 +12,8 @@ import {
   Prisma,
   type User,
 } from '@prisma/client';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/interfaces';
 import { ProjectService } from '../project/project.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto, EditCommentDto } from './dto';
@@ -32,6 +34,7 @@ export class CommentService {
     private taskService: TaskService,
     @Inject(forwardRef(() => FileService))
     private fileService: FileService,
+    private notificationService: NotificationService,
   ) {}
 
   async checkReadAccess(user: UserInSession, commentId: number) {
@@ -122,6 +125,20 @@ export class CommentService {
       },
       include: { createdBy: true },
     });
+
+    const notifiableUsers =
+      await this.commentableMap[commentableType].getNotifiableUsers(
+        commentableId,
+      );
+
+    await this.notificationService.createNotifications(
+      notifiableUsers.filter((el) => el !== userId),
+      commentableType === 'Task'
+        ? NotificationType.TaskCommented
+        : NotificationType.ProjectCommented,
+      commentableId,
+      commentableType,
+    );
 
     const files =
       uploadedFiles.length > 0

@@ -6,6 +6,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/interfaces';
 import { CommentService } from '../comment/comment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto, EditProjectDto } from './dto';
@@ -23,6 +25,7 @@ export class ProjectService {
     @Inject(forwardRef(() => CommentService))
     private commentService: CommentService,
     private taskService: TaskService,
+    private notificationService: NotificationService,
   ) {}
 
   async checkAccess(user: UserInSession, projectId: number) {
@@ -32,6 +35,14 @@ export class ProjectService {
       if (!project.users.some((el) => el.user.id === user.id))
         throw new ForbiddenException('You are not in this project');
     }
+  }
+
+  async getNotifiableUsers(projectId: number) {
+    const projectUsers = await this.prismaService.projectUser.findMany({
+      where: { projectId },
+    });
+
+    return projectUsers.map((el) => el.userId);
   }
 
   async getProjects(user?: UserInSession) {
@@ -62,12 +73,27 @@ export class ProjectService {
     });
   }
 
-  async editProject(id: number, editProjectDto: EditProjectDto) {
+  async editProject(
+    id: number,
+    editProjectDto: EditProjectDto,
+    editorId?: number,
+  ) {
     try {
-      return await this.prismaService.project.update({
+      const editedProject = await this.prismaService.project.update({
         where: { id },
         data: editProjectDto,
       });
+
+      const users = await this.getNotifiableUsers(id);
+
+      await this.notificationService.createNotifications(
+        users.filter((el) => el !== editorId),
+        NotificationType.ProjectChanged,
+        id,
+        'Project',
+      );
+
+      return editedProject;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
@@ -101,12 +127,29 @@ export class ProjectService {
     }
   }
 
-  async addUserToProject(id: number, userId: number) {
+  async addUserToProject(id: number, userId: number, assignerId?: number) {
     try {
+      const user = await this.prismaService.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) throw new NotFoundException('User with this id not found');
+
+      if (!user.emailVerified)
+        throw new ForbiddenException('User email not verified');
+
       await this.prismaService.project.update({
         where: { id },
         data: { users: { create: { userId } } },
       });
+
+      if (assignerId !== userId)
+        await this.notificationService.createNotification(
+          userId,
+          NotificationType.ProjectAssigned,
+          id,
+          'Project',
+        );
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')

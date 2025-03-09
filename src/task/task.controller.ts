@@ -77,8 +77,9 @@ export class TaskController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     editTaskDto: EditTaskDto,
+    @User() user: UserInSession,
   ) {
-    const task = await this.taskService.editTask(id, editTaskDto);
+    const task = await this.taskService.editTask(id, editTaskDto, user.id);
 
     return {
       ...task,

@@ -1,4 +1,4 @@
-import { MessagingModule } from './messaging/messaging.module';
+import { NotificationModule } from './notification/notification.module';
 import { ProjectModule } from './project/project.module';
 import { CommentModule } from './comment/comment.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -20,7 +20,7 @@ import { Module } from '@nestjs/common';
     PrismaModule,
     UserModule,
     AuthModule,
-    MessagingModule,
+    NotificationModule,
     ScheduleModule.forRoot(),
     ProjectModule,
     SeedModule,
