@@ -135,7 +135,7 @@ export class NotificationService {
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async sendEmailNotifications() {
     const notifications = await this.prismaService.notification.findMany({
-      where: { emailSent: false },
+      where: { emailSent: false, read: false },
       include: { recipient: true },
     });
 

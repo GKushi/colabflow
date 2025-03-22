@@ -114,15 +114,19 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [x] Addjust user stories for new changes
 - [x] Ensure that files are deleted after task/project/comment deletion
 - [x] Properly test implemented notifcication system
-- [ ] Go through and check user permissions
-- [ ] Go through and check user stories
+- [x] Go through and check user permissions
+- [x] Go through and check user stories
+- [ ] Make Manager able to manage files on projects and tasks
+- [ ] Make Team Member able to manage files on tasks
 - [ ] Read about proper error handling and add it for all endpoints
-- [ ] Ensure that comments are deleted after user deletion
+  - [ ] Dont throw HTTP errors in services
 - [ ] Pagination, filtering and sorting for all endpoints
 - [ ] Refinements
+  - [ ] Better permissions
   - [ ] Add some optional database fields (e.g. assignedUser in Task model)
   - [x] Authorization checks for specific actions (e.g. only project members can add and see its tasks)
   - [ ] Add ability to follow tasks for users assigned to project
+  - [ ] User management for admins
 
 ## Todo list
 
@@ -202,6 +206,13 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Persist chat messages in the database
   - [ ] Implement message history retrieval and pagination
 
+- [ ] Deployment
+
+  - [ ] Configure CI/CD pipeline using GitHub Actions or Jenkins
+  - [ ] Automate builds, testing, and deployments to staging and production
+  - [ ] Deploy application to AWS ECS, EKS, or Kubernetes cluster
+  - [ ] Implement logging and monitoring in the production environment
+
 - [ ] Rate Limiting and Throttling
 
   - [ ] Install and configure @nestjs/throttler
@@ -209,6 +220,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Set up custom rate limits for specific endpoints
   - [ ] Configure rate limits based on user roles and IP addresses
   - [ ] Implement protection against brute-force attacks on authentication endpoints
+
+- [ ] Logging
+
+  - [ ] Integrate Winston or Morgan for logging
+  - [ ] Set up different log levels (info, warning, error)
+  - [ ] Configure log transports to files and external logging services
+  - [ ] Implement request logging middleware
+  - [ ] Correlate logs with user sessions and requests
 
 - [ ] Automated Backups
 
@@ -225,31 +244,11 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Use mocking and test databases to isolate tests
   - [ ] Aim for high code coverage and maintain testing reports
 
-- [ ] Deployment
-
-  - [ ] Configure CI/CD pipeline using GitHub Actions or Jenkins
-  - [ ] Automate builds, testing, and deployments to staging and production
-  - [ ] Deploy application to AWS ECS, EKS, or Kubernetes cluster
-  - [ ] Implement logging and monitoring in the production environment
-
-- [ ] Logging
-
-  - [ ] Integrate Winston or Morgan for logging
-  - [ ] Set up different log levels (info, warning, error)
-  - [ ] Configure log transports to files and external logging services
-  - [ ] Implement request logging middleware
-  - [ ] Correlate logs with user sessions and requests
-
 - [ ] Database Management
 
   - [x] Use Prisma migrations for schema changes
   - [ ] Optimize database queries and indexing
   - [x] Implement data seeding for development and testing environments
-
-- [ ] Future Enhancements
-
-  - [ ] Add two-factor authentication (2FA) for enhanced security
-  - [ ] Allow users to manage notification preferences
 
 - [ ] Documentation
   - [x] Write comprehensive README with setup instructions
@@ -258,3 +257,8 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Annotate controllers and DTOs with Swagger decorators
   - [ ] Generate interactive API documentation at /api-docs
   - [ ] Ensure all endpoints, models, and possible responses are documented
+
+- [ ] Future Enhancements
+
+  - [ ] Add two-factor authentication (2FA) for enhanced security
+  - [ ] Allow users to manage notification preferences

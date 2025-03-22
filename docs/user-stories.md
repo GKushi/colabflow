@@ -47,9 +47,16 @@ As a **Team Member**, I want to be able to upload any files to a project up to 1
 As a **Team Member**, I want to be able to upload images to a comment up to 2 at the time, 10MBs, maxiumum 2 images, so that I can share it with others.
 As a **Team Member**, I want to be able to delete my file.
 As a **Team Member**, I want to be able to download a file so that I can view it.
+As a **Team Member**, I want to be able to manage files on tasks so I can keep tasks organized.
+As a **Manager**, I want to be able to manage files on projects and tasks so I can keep projects organized.
 As a **Admin**, I want to be able to manage any file so that I can moderate the platform.
 
 ## Notifications
+
+As a **Team Member**, I want to be able to receive notifications for changes in projects, tasks so that I can stay up to date.
+As a **Team Member**, I want to be able to receive notifications for new comments in projects, tasks so that I can stay up to date.
+As a **Team Member**, I want to be able to receive notifications when I'm assigned to task or project, so that I can stay up to date.
+As a **Team Member**, I want to be able to receive email notifications if I'm away from a platform, so that I can stay up to date.
 
 ## Chat
 
