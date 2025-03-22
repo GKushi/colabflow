@@ -29,10 +29,14 @@ export class TaskService {
     private notificationService: NotificationService,
   ) {}
 
-  async checkAccess(user: UserInSession, taskId: number) {
+  async checkReadAccess(user: UserInSession, taskId: number) {
     const task = await this.getOne(taskId);
 
-    await this.projectService.checkAccess(user, task.projectId);
+    await this.projectService.checkReadAccess(user, task.projectId);
+  }
+
+  async checkModifyAccess(user: UserInSession, taskId: number) {
+    await this.checkReadAccess(user, taskId);
   }
 
   async getNotifiableUsers(taskId: number) {

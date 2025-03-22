@@ -16,7 +16,7 @@ import {
   FileTypeValidator,
   BadRequestException,
 } from '@nestjs/common';
-import { TaskAccessGuard } from './guards/task-access.guard';
+import { TaskReadAccessGuard } from './guards/task-read-access.guard';
 import { CommentService } from '../comment/comment.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { User } from '../auth/decorators/user.decorator';
@@ -27,7 +27,7 @@ import { TaskService } from './task.service';
 import { EditTaskDto } from './dto';
 
 @Controller('task')
-@UseGuards(TaskAccessGuard)
+@UseGuards(TaskReadAccessGuard)
 export class TaskController {
   constructor(
     private taskService: TaskService,

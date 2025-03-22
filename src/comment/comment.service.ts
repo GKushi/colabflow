@@ -40,7 +40,7 @@ export class CommentService {
   async checkReadAccess(user: UserInSession, commentId: number) {
     const comment = await this.getOne(commentId);
 
-    await this.commentableMap[comment.commentableType].checkAccess(
+    await this.commentableMap[comment.commentableType].checkReadAccess(
       user,
       comment.commentableId,
     );

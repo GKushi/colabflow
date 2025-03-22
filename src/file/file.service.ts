@@ -18,18 +18,9 @@ import type { UserInSession } from '../auth/interfaces';
 import { TaskService } from '../task/task.service';
 import { StorageService } from './storage.service';
 
-interface FileableService {
-  checkAccess?: (user: UserInSession, id: number) => Promise<void>;
-  checkReadAccess?: (user: UserInSession, id: number) => Promise<void>;
-  getOne(id: number): Promise<any>;
-}
-
 @Injectable()
 export class FileService {
-  private readonly fileableMap: Record<
-    FileableType,
-    { service: FileableService; limit: number }
-  > = {
+  private readonly fileableMap = {
     Project: { service: this.projectService, limit: 100 },
     Task: { service: this.taskService, limit: 20 },
     Comment: { service: this.commentService, limit: 2 },
@@ -50,24 +41,14 @@ export class FileService {
     const file = await this.getOne(fileId);
     const fileable = this.fileableMap[file.fileableType];
 
-    if (fileable.service.checkAccess) {
-      await fileable.service.checkAccess(user, file.fileableId);
-    } else if (fileable.service.checkReadAccess) {
-      await fileable.service.checkReadAccess(user, file.fileableId);
-    } else {
-      throw new Error(
-        `No access check method found for type ${file.fileableType}`,
-      );
-    }
+    await fileable.service.checkReadAccess(user, file.fileableId);
   }
 
   async checkModifyAccess(user: UserInSession, fileId: number) {
     const file = await this.getOne(fileId);
+    const fileable = this.fileableMap[file.fileableType];
 
-    if (user.role === 'ADMIN') return;
-
-    if (file.createdById !== user.id)
-      throw new ForbiddenException('You are not the creator of this file');
+    await fileable.service.checkModifyAccess(user, file.fileableId);
   }
 
   async getFiles(

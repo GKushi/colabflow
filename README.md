@@ -116,8 +116,8 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - [x] Properly test implemented notifcication system
 - [x] Go through and check user permissions
 - [x] Go through and check user stories
-- [ ] Make Manager able to manage files on projects and tasks
-- [ ] Make Team Member able to manage files on tasks
+- [x] Make Manager able to manage files on projects and tasks
+- [x] Make Team Member able to manage files on tasks
 - [ ] Read about proper error handling and add it for all endpoints
   - [ ] Dont throw HTTP errors in services
 - [ ] Pagination, filtering and sorting for all endpoints

@@ -17,7 +17,7 @@ import {
   UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
-import { ProjectAccessGuard } from './guards/project-access.guard';
+import { ProjectReadAccessGuard } from './guards/project-read-access.guard';
 import { CommentService } from '../comment/comment.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Role } from '../auth/decorators/role.decorator';
@@ -45,7 +45,7 @@ export class ProjectController {
     return this.projectService.getProjects(user);
   }
 
-  @UseGuards(ProjectAccessGuard)
+  @UseGuards(ProjectReadAccessGuard)
   @Get(':id')
   async getProject(@Param('id', ParseIntPipe) id: number) {
     const project = await this.projectService.getOne(id);
@@ -122,7 +122,7 @@ export class ProjectController {
     return { success: true, message: 'User removed from project' };
   }
 
-  @UseGuards(ProjectAccessGuard)
+  @UseGuards(ProjectReadAccessGuard)
   @Get(':id/tasks')
   async getProjectTasks(@Param('id', ParseIntPipe) projectId: number) {
     const tasks = await this.taskService.getTasks(projectId);
@@ -143,7 +143,7 @@ export class ProjectController {
     });
   }
 
-  @UseGuards(ProjectAccessGuard)
+  @UseGuards(ProjectReadAccessGuard)
   @Post(':id/tasks')
   async createProjectTask(
     @Param('id', ParseIntPipe) project: number,
@@ -179,7 +179,7 @@ export class ProjectController {
     };
   }
 
-  @UseGuards(ProjectAccessGuard)
+  @UseGuards(ProjectReadAccessGuard)
   @Get(':id/comments')
   async getComments(@Param('id', ParseIntPipe) projectId: number) {
     const comments = await this.commentService.getComments(
@@ -207,7 +207,7 @@ export class ProjectController {
     }));
   }
 
-  @UseGuards(ProjectAccessGuard)
+  @UseGuards(ProjectReadAccessGuard)
   @UseInterceptors(FilesInterceptor('file', 2))
   @Post(':id/comments')
   async createComment(
@@ -257,7 +257,7 @@ export class ProjectController {
     };
   }
 
-  @UseGuards(ProjectAccessGuard)
+  @UseGuards(ProjectReadAccessGuard)
   @UseInterceptors(FilesInterceptor('file', 10))
   @Post(':id/files')
   async createFiles(

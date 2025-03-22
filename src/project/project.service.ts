@@ -28,13 +28,22 @@ export class ProjectService {
     private notificationService: NotificationService,
   ) {}
 
-  async checkAccess(user: UserInSession, projectId: number) {
+  async checkReadAccess(user: UserInSession, projectId: number) {
     const project = await this.getOne(projectId);
 
     if (user.role === 'TEAM_MEMBER') {
       if (!project.users.some((el) => el.user.id === user.id))
         throw new ForbiddenException('You are not in this project');
     }
+  }
+
+  async checkModifyAccess(user: UserInSession, projectId: number) {
+    await this.checkReadAccess(user, projectId);
+
+    if (user.role === 'TEAM_MEMBER')
+      throw new ForbiddenException(
+        'You are not allowed to modify this project',
+      );
   }
 
   async getNotifiableUsers(projectId: number) {
