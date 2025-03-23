@@ -1,3 +1,4 @@
+import { EmailSendFailedException } from './exceptions';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import type { Email } from './interfaces';
@@ -20,7 +21,7 @@ export class EmailService {
   }
 
   async sendMail(email: Email) {
-    return new Promise<void>((res, rej) => {
+    return new Promise<void>((res) => {
       this.transporter.sendMail(
         {
           from: this.configService.get('MAIL_SENDER'),
@@ -29,7 +30,7 @@ export class EmailService {
           html: email.htmlMessage,
         },
         (err) => {
-          if (err) rej(err);
+          if (err) throw new EmailSendFailedException(email.recipient);
           res();
         },
       );

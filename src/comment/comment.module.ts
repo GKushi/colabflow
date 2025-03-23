@@ -1,4 +1,4 @@
-import { NotificationModule } from 'src/notification/notification.module';
+import { NotificationModule } from '../notification/notification.module';
 import { ProjectModule } from '../project/project.module';
 import { CommentController } from './comment.controller';
 import { forwardRef, Module } from '@nestjs/common';

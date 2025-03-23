@@ -1,13 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ResourceNotFoundException } from '../common/exceptions';
 import { EmailService } from '../notification/email.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { VerificationTokenType } from '@prisma/client';
+import { InvalidTokenException } from './exceptions';
 import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
 @Injectable()
@@ -107,10 +105,9 @@ export class VerificationService {
       where: { token },
     });
 
-    if (!foundToken) throw new NotFoundException('Invalid token');
+    if (!foundToken) throw new ResourceNotFoundException('Token');
 
-    if (foundToken.expiresAt < new Date())
-      throw new BadRequestException('Token expired');
+    if (foundToken.expiresAt < new Date()) throw new InvalidTokenException();
 
     await this.prismaService.verificationToken.delete({
       where: { id: foundToken.id },

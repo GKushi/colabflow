@@ -17,13 +17,9 @@ export class ProjectReadAccessGuard implements CanActivate {
     const session: SessionWithUser = request.session;
     const projectId = parseInt(request.params.id);
 
-    if (!projectId) {
-      throw new NotFoundException('Project ID not found');
-    }
+    if (!projectId) throw new NotFoundException('Project ID not found');
 
-    if (!session.user) {
-      throw new UnauthorizedException('User not found');
-    }
+    if (!session.user) throw new UnauthorizedException('User not found');
 
     await this.projectService.checkReadAccess(session.user, projectId);
 

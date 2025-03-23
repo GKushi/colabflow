@@ -1,13 +1,15 @@
 import {
-  ConflictException,
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+  PermissionDeniedException,
+  ResourceNotFoundException,
+} from '../common/exceptions';
+import {
+  UserAlreadyInProjectException,
+  UserNotInProjectException,
+} from './exceptions';
 import { NotificationService } from '../notification/notification.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { NotificationType } from '../notification/interfaces';
+import { UserNotVerifiedException } from '../auth/exceptions';
 import { CommentService } from '../comment/comment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto, EditProjectDto } from './dto';
@@ -33,7 +35,7 @@ export class ProjectService {
 
     if (user.role === 'TEAM_MEMBER') {
       if (!project.users.some((el) => el.user.id === user.id))
-        throw new ForbiddenException('You are not in this project');
+        throw new UserNotInProjectException(user.id, projectId);
     }
   }
 
@@ -41,7 +43,7 @@ export class ProjectService {
     await this.checkReadAccess(user, projectId);
 
     if (user.role === 'TEAM_MEMBER')
-      throw new ForbiddenException(
+      throw new PermissionDeniedException(
         'You are not allowed to modify this project',
       );
   }
@@ -69,7 +71,7 @@ export class ProjectService {
       include: { users: { select: { user: true } } },
     });
 
-    if (!project) throw new NotFoundException('Project with this id not found');
+    if (!project) throw new ResourceNotFoundException('Project', id);
 
     const files = await this.fileService.getFiles(id, 'Project');
 
@@ -106,7 +108,7 @@ export class ProjectService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Project with this id not found');
+          throw new ResourceNotFoundException('Project', id);
       }
 
       throw e;
@@ -129,7 +131,7 @@ export class ProjectService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Project with this id not found');
+          throw new ResourceNotFoundException('Project', id);
       }
 
       throw e;
@@ -142,10 +144,9 @@ export class ProjectService {
         where: { id: userId },
       });
 
-      if (!user) throw new NotFoundException('User with this id not found');
+      if (!user) throw new ResourceNotFoundException('Project', id);
 
-      if (!user.emailVerified)
-        throw new ForbiddenException('User email not verified');
+      if (!user.emailVerified) throw new UserNotVerifiedException(user.id);
 
       await this.prismaService.project.update({
         where: { id },
@@ -162,13 +163,13 @@ export class ProjectService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Project with this id not found');
+          throw new ResourceNotFoundException('Project', id);
 
         if (e.code === 'P2003')
-          throw new NotFoundException('User with this id not found');
+          throw new ResourceNotFoundException('User', userId);
 
         if (e.code === 'P2002')
-          throw new ConflictException('User already in project');
+          throw new UserAlreadyInProjectException(userId, id);
       }
 
       throw e;
@@ -185,8 +186,7 @@ export class ProjectService {
       });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2017')
-          throw new NotFoundException('That relation does not exist');
+        if (e.code === 'P2017') throw new ResourceNotFoundException('Relation');
       }
 
       throw e;

@@ -1,12 +1,8 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Prisma, type Project, type Task, type User } from '@prisma/client';
 import { NotificationService } from '../notification/notification.service';
+import { UserNotInProjectException } from '../project/exceptions';
+import { ResourceNotFoundException } from '../common/exceptions';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { NotificationType } from '../notification/interfaces';
 import { ProjectService } from '../project/project.service';
 import { CommentService } from '../comment/comment.service';
@@ -14,7 +10,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
 import { CreateTaskDto, EditTaskDto } from './dto';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TaskService {
@@ -66,7 +61,7 @@ export class TaskService {
       include: { project: true, assignedTo: true, createdBy: true },
     });
 
-    if (!task) throw new NotFoundException('Task not found');
+    if (!task) throw new ResourceNotFoundException('Task', id);
 
     const files = await this.fileService.getFiles(task.id, 'Task');
 
@@ -81,7 +76,7 @@ export class TaskService {
     const project = await this.projectService.getOne(projectId);
 
     if (!project.users.some((el) => el.user.id === createTaskDto.assignedTo))
-      throw new ForbiddenException('User is not in this project');
+      throw new UserNotInProjectException(userId, projectId);
 
     try {
       const newTask = await this.prismaService.task.create({
@@ -121,7 +116,7 @@ export class TaskService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Project or User with this id not found');
+          throw new ResourceNotFoundException('Project or user');
       }
 
       throw e;
@@ -139,68 +134,74 @@ export class TaskService {
       assignedTo &&
       !fetchedProject.users.some((el) => el.user.id === assignedTo)
     )
-      throw new BadRequestException('User is not in this project');
+      throw new UserNotInProjectException(assignedTo, fetchedProject.id);
 
     const assignedToField = assignedTo
       ? { assignedTo: { connect: { id: assignedTo } } }
       : {};
 
+    let updatedTask: Task & {
+      project: Project;
+      assignedTo: User;
+      createdBy: User;
+    };
+
     try {
-      const updatedTask = await this.prismaService.task.update({
+      updatedTask = await this.prismaService.task.update({
         where: { id },
         data: { ...editTaskProps, ...assignedToField },
         include: { project: true, assignedTo: true, createdBy: true },
       });
-
-      if (assignedTo && updatedTask.assignedTo.id !== editorId)
-        await this.notificationService.createNotification(
-          updatedTask.assignedTo.id,
-          NotificationType.TaskAssigned,
-          updatedTask.id,
-          'Task',
-        );
-
-      if (Object.keys(editTaskProps).length > 0)
-        await this.notificationService.createNotifications(
-          [
-            updatedTask.createdBy.id,
-            ...(assignedTo ? [] : [updatedTask.assignedTo.id]),
-          ].filter((el) => el !== editorId),
-          NotificationType.TaskChanged,
-          updatedTask.id,
-          'Task',
-        );
-
-      return updatedTask;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Project or User with this id not found');
+          throw new ResourceNotFoundException('Project or user');
       }
 
       throw e;
     }
+
+    if (assignedTo && updatedTask.assignedTo.id !== editorId)
+      await this.notificationService.createNotification(
+        updatedTask.assignedTo.id,
+        NotificationType.TaskAssigned,
+        updatedTask.id,
+        'Task',
+      );
+
+    if (Object.keys(editTaskProps).length > 0)
+      await this.notificationService.createNotifications(
+        [
+          updatedTask.createdBy.id,
+          ...(assignedTo ? [] : [updatedTask.assignedTo.id]),
+        ].filter((el) => el !== editorId),
+        NotificationType.TaskChanged,
+        updatedTask.id,
+        'Task',
+      );
+
+    return updatedTask;
   }
 
   async deleteTask(id: number) {
+    let deletedTask: Task;
     try {
-      const deletedTask = await this.prismaService.task.delete({
+      deletedTask = await this.prismaService.task.delete({
         where: { id },
       });
-
-      await this.fileService.deleteFiles(id, 'Task');
-
-      await this.commentService.deleteComments(id, 'Task');
-
-      return deletedTask;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025')
-          throw new NotFoundException('Task with this id not found');
+        if (e.code === 'P2025') throw new ResourceNotFoundException('Task', id);
       }
 
       throw e;
     }
+
+    await this.fileService.deleteFiles(id, 'Task');
+
+    await this.commentService.deleteComments(id, 'Task');
+
+    return deletedTask;
   }
 
   async deleteTasks(projectId: number) {

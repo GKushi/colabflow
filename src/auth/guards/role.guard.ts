@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../../user/user.service';
 import { SessionWithUser } from '../interfaces';
 import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';

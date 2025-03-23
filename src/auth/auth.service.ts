@@ -1,10 +1,8 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+  InvalidCredentialsException,
+  PasswordUnchangedException,
+  UserAlreadyVerifiedException,
+} from './exceptions';
 import {
   ChangePasswordDto,
   ForgotPasswordDto,
@@ -12,8 +10,10 @@ import {
   RegisterDto,
   ResetPasswordDto,
 } from './dto';
+import { ResourceNotFoundException } from '../common/exceptions';
 import { VerificationService } from './verification.service';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -56,12 +56,12 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const foundUser = await this.userService.findUserByEmail(loginDto.email);
 
-    if (!foundUser) throw new UnauthorizedException('Invalid credentials');
+    if (!foundUser) throw new InvalidCredentialsException();
 
     if (
       !(await this.comparePassword(loginDto.password, foundUser.passwordHash))
     )
-      throw new UnauthorizedException('Invalid credentials');
+      throw new InvalidCredentialsException();
 
     return foundUser;
   }
@@ -69,21 +69,14 @@ export class AuthService {
   async sendVerificationToken(userId: number) {
     const user = await this.userService.findUserById(userId);
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new ResourceNotFoundException('User', userId);
 
-    if (user.emailVerified)
-      throw new BadRequestException('Email already verified');
+    if (user.emailVerified) throw new UserAlreadyVerifiedException(userId);
 
-    try {
-      await this.verificationService.createAndSendEmailVerificationToken(
-        userId,
-        user.email,
-      );
-    } catch {
-      throw new InternalServerErrorException(
-        'Failed to send verification token',
-      );
-    }
+    await this.verificationService.createAndSendEmailVerificationToken(
+      userId,
+      user.email,
+    );
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
@@ -91,7 +84,7 @@ export class AuthService {
       forgotPasswordDto.email,
     );
 
-    if (!foundUser) throw new NotFoundException('User not found');
+    if (!foundUser) throw new ResourceNotFoundException('User');
 
     await this.verificationService.createAndSendPasswordResetToken(
       foundUser.id,
@@ -115,13 +108,11 @@ export class AuthService {
 
   async changePassword(changePasswordDto: ChangePasswordDto, userId: number) {
     if (changePasswordDto.newPassword === changePasswordDto.oldPassword)
-      throw new BadRequestException(
-        'New password cannot be the same as old password',
-      );
+      throw new PasswordUnchangedException();
 
     const user = await this.userService.findUserById(userId);
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new ResourceNotFoundException('User', userId);
 
     if (
       !(await this.comparePassword(
@@ -129,7 +120,7 @@ export class AuthService {
         user.passwordHash,
       ))
     )
-      throw new UnauthorizedException('Invalid credentials');
+      throw new InvalidCredentialsException();
 
     await this.userService.updateUser(userId, {
       passwordHash: await this.hashPassword(changePasswordDto.newPassword),

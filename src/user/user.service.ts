@@ -1,5 +1,6 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { InvalidCredentialsException } from '../auth/exceptions';
 import { PrismaService } from '../prisma/prisma.service';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { CreateUserData } from './interfaces';
 
@@ -12,10 +13,7 @@ export class UserService {
       return await this.prismaService.user.create({ data: user });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2002')
-          throw new ConflictException(
-            'User with this credentials already exists',
-          );
+        if (e.code === 'P2002') throw new InvalidCredentialsException();
       }
 
       throw e;

@@ -1,18 +1,14 @@
 import {
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import {
   type FileableType,
   Prisma,
   type User,
   type File,
 } from '@prisma/client';
+import { ResourceNotFoundException } from '../common/exceptions';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CommentService } from '../comment/comment.service';
 import { ProjectService } from '../project/project.service';
+import { FileLimitExceededException } from './exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UserInSession } from '../auth/interfaces';
 import { TaskService } from '../task/task.service';
@@ -90,7 +86,7 @@ export class FileService {
       include: { createdBy: true },
     });
 
-    if (!file) throw new NotFoundException('File not found');
+    if (!file) throw new ResourceNotFoundException('File', id);
 
     const url = await this.storageService.getFileUrl(file.fileName);
 
@@ -146,7 +142,7 @@ export class FileService {
       return deleted;
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2025') throw new NotFoundException('File not found');
+        if (e.code === 'P2025') throw new ResourceNotFoundException('File', id);
       }
 
       throw e;
@@ -173,6 +169,6 @@ export class FileService {
     });
 
     if (files + newFiles > fileable.limit)
-      throw new ForbiddenException('File limit exceeded');
+      throw new FileLimitExceededException(fileableType, fileableId);
   }
 }

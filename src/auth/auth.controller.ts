@@ -77,7 +77,13 @@ export class AuthController {
   @Get('send-verification-token')
   @NoVerification()
   async sendVerificationToken(@User() user: UserInSession) {
-    await this.authService.sendVerificationToken(user.id);
+    try {
+      await this.authService.sendVerificationToken(user.id);
+    } catch (e) {
+      console.error(
+        `Failed to send verification token to user with id ${user.id}: ${e}`,
+      );
+    }
 
     return { success: true, message: 'Verification token sent' };
   }
@@ -99,8 +105,10 @@ export class AuthController {
   ) {
     try {
       await this.authService.forgotPassword(forgotPasswordDto);
-    } catch {
-      console.error('Failed to send password reset token');
+    } catch (e) {
+      console.error(
+        `Failed to send password reset token to user with password ${forgotPasswordDto.email}: ${e}`,
+      );
     }
 
     return { success: true, message: 'Password reset token sent' };

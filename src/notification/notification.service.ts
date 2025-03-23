@@ -4,16 +4,15 @@ import {
   Prisma,
   User,
 } from '@prisma/client';
-import {
-  NotificationEmailContent,
-  NotificationMailingSettings,
-} from './constants';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ResourceNotFoundException } from '../common/exceptions';
+import { UserNotVerifiedException } from '../auth/exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { NotificationEmailContent } from './constants';
 import { NotificationType } from './interfaces';
 import { EmailService } from './email.service';
 import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class NotificationService {
@@ -77,7 +76,7 @@ export class NotificationService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Notification with this id not found');
+          throw new ResourceNotFoundException('Notification', notificationId);
       }
 
       throw e;
@@ -94,25 +93,19 @@ export class NotificationService {
   async sendEmailNotification(
     notification: Notification & { recipient: User },
   ) {
-    if (!notification.recipient.emailVerified) return false;
+    if (!notification.recipient.emailVerified)
+      throw new UserNotVerifiedException(notification.recipient.id);
 
     const emailContent =
       NotificationEmailContent[notification.type as NotificationType];
 
-    try {
-      await this.emailService.sendMail({
-        recipient: notification.recipient.email,
-        subject: emailContent.subject,
-        htmlMessage: emailContent.content(
-          `${this.configService.get('FRONTEND_URL')}/${notification.resourceType.toLowerCase()}/${notification.resourceId}`,
-        ),
-      });
-
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
+    await this.emailService.sendMail({
+      recipient: notification.recipient.email,
+      subject: emailContent.subject,
+      htmlMessage: emailContent.content(
+        `${this.configService.get('FRONTEND_URL')}/${notification.resourceType.toLowerCase()}/${notification.resourceId}`,
+      ),
+    });
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
@@ -140,12 +133,18 @@ export class NotificationService {
     });
 
     for (const notification of notifications) {
-      const success = await this.sendEmailNotification(notification);
-      if (!success) continue;
-      await this.prismaService.notification.update({
-        where: { id: notification.id },
-        data: { emailSent: true },
-      });
+      try {
+        await this.sendEmailNotification(notification);
+
+        await this.prismaService.notification.update({
+          where: { id: notification.id },
+          data: { emailSent: true },
+        });
+      } catch (e) {
+        console.error(
+          `Failed to send email notification with id: ${notification.id} to ${notification.recipient.email}: ${e}`,
+        );
+      }
     }
   }
 }

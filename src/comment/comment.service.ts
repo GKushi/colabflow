@@ -1,18 +1,16 @@
 import {
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import {
   type Comment,
   type CommentableType,
   type File,
   Prisma,
   type User,
 } from '@prisma/client';
+import {
+  PermissionDeniedException,
+  ResourceNotFoundException,
+} from '../common/exceptions';
 import { NotificationService } from '../notification/notification.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { NotificationType } from '../notification/interfaces';
 import { ProjectService } from '../project/project.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -52,7 +50,9 @@ export class CommentService {
     if (user.role === 'ADMIN') return;
 
     if (comment.createdById !== user.id)
-      throw new ForbiddenException('You are not the creator of this comment');
+      throw new PermissionDeniedException(
+        'You are not the creator of this comment',
+      );
   }
 
   async getComments(
@@ -100,7 +100,7 @@ export class CommentService {
       include: { createdBy: true },
     });
 
-    if (!comment) throw new NotFoundException('Comment not found');
+    if (!comment) throw new ResourceNotFoundException('Comment', id);
 
     const files = await this.fileService.getFiles(comment.id, 'Comment', true);
 
@@ -164,7 +164,7 @@ export class CommentService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Comment not found');
+          throw new ResourceNotFoundException('Comment', id);
       }
 
       throw e;
@@ -183,7 +183,7 @@ export class CommentService {
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025')
-          throw new NotFoundException('Comment not found');
+          throw new ResourceNotFoundException('Comment', id);
       }
 
       throw e;
