@@ -1,11 +1,22 @@
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { PrismaClient } from '@prisma/client';
+import { WinstonModule } from 'nest-winston';
+import { transports, format } from 'winston';
 import * as session from 'express-session';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger({
+      level: 'info',
+      format: format.combine(format.timestamp(), format.json()),
+      transports: [
+        new transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new transports.Console(),
+      ],
+    }),
+  });
 
   app.use(
     session({

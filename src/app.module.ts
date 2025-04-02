@@ -1,5 +1,7 @@
 import { DomainExceptionFilter } from './common/domain-exception.filter';
 import { NotificationModule } from './notification/notification.module';
+import { Logger, MiddlewareConsumer, Module } from '@nestjs/common';
+import { LoggerMiddleware } from './common/logging.middleware';
 import { ProjectModule } from './project/project.module';
 import { CommentModule } from './comment/comment.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -13,7 +15,6 @@ import { SeedModule } from './seed/seed.module';
 import { TaskModule } from './task/task.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
-import { Module } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { Module } from '@nestjs/common';
     FileModule,
   ],
   providers: [
+    Logger,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
@@ -44,4 +46,8 @@ import { Module } from '@nestjs/common';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

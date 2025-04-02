@@ -4,12 +4,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { VerificationTokenType } from '@prisma/client';
 import { InvalidTokenException } from './exceptions';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class VerificationService {
+  private readonly logger = new Logger(VerificationService.name);
   private readonly tokenExpirationTime = 1000 * 60 * 10;
 
   constructor(
@@ -118,6 +119,8 @@ export class VerificationService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async removeExpiredTokens() {
+    this.logger.log('Routinely clearing expired verification tokens');
+
     await this.prismaService.verificationToken.deleteMany({
       where: { expiresAt: { lt: new Date() } },
     });

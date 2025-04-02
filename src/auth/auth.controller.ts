@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Session,
@@ -24,6 +25,8 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private authService: AuthService) {}
 
   @Post('register')
@@ -77,13 +80,7 @@ export class AuthController {
   @Get('send-verification-token')
   @NoVerification()
   async sendVerificationToken(@User() user: UserInSession) {
-    try {
-      await this.authService.sendVerificationToken(user.id);
-    } catch (e) {
-      console.error(
-        `Failed to send verification token to user with id ${user.id}: ${e}`,
-      );
-    }
+    await this.authService.sendVerificationToken(user.id);
 
     return { success: true, message: 'Verification token sent' };
   }
@@ -106,9 +103,7 @@ export class AuthController {
     try {
       await this.authService.forgotPassword(forgotPasswordDto);
     } catch (e) {
-      console.error(
-        `Failed to send password reset token to user with password ${forgotPasswordDto.email}: ${e}`,
-      );
+      if (e instanceof Error) this.logger.error(e.message, e.stack);
     }
 
     return { success: true, message: 'Password reset token sent' };

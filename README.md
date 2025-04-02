@@ -106,20 +106,19 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 ## Temporary Todo list
 
-- [x] Check if roles are working properly
-- [x] Comments are not deleted after task/project deletion
-- [x] Return releated files in "getOne" method of tasks, projects, comments and remove getting related files from their controllers
-- [x] Only allow !images! to be related with comments
-- [x] Add files within create comment endpoint
-- [x] Addjust user stories for new changes
-- [x] Ensure that files are deleted after task/project/comment deletion
-- [x] Properly test implemented notifcication system
-- [x] Go through and check user permissions
-- [x] Go through and check user stories
-- [x] Make Manager able to manage files on projects and tasks
-- [x] Make Team Member able to manage files on tasks
-- [x] Read about proper error handling and add it for all endpoints
-  - [x] Dont throw HTTP errors in services
+- [x] Work on better logging
+  - [x] Add info logs for critical actions
+    - [x] Creating & deleting project
+    - [x] Register new user user
+    - [x] Verification of user - emails
+    - [x] Adding and deleting file
+    - [x] Resetting password and changing it
+    - [x] Email notification fail
+  - [x] Add logs for exceptions catched in services (errors unhandled are already logged by global exception filter)
+  - [x] Add configuration error
+- [x] Replace logging interceptor with middleware, because it is not working properly - auth check doesnt work, duration doesnt work
+- [x] Check forget password & send verification token endpoint
+- [x] Test logs
 - [ ] Pagination, filtering and sorting for all endpoints
 - [ ] Refinements
   - [ ] Better permissions
@@ -221,13 +220,12 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Configure rate limits based on user roles and IP addresses
   - [ ] Implement protection against brute-force attacks on authentication endpoints
 
-- [ ] Logging
+- [x] Logging
 
-  - [ ] Integrate Winston or Morgan for logging
-  - [ ] Set up different log levels (info, warning, error)
-  - [ ] Configure log transports to files and external logging services
-  - [ ] Implement request logging middleware
-  - [ ] Correlate logs with user sessions and requests
+  - [x] Integrate Winston or Morgan for logging
+  - [x] Set up different log levels (info, warning, error)
+  - [x] Configure log transports to files and external logging services
+  - [x] Correlate logs with user sessions and requests
 
 - [ ] Automated Backups
 

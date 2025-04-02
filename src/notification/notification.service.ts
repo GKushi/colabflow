@@ -9,13 +9,15 @@ import { UserNotVerifiedException } from '../auth/exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { NotificationEmailContent } from './constants';
+import { Injectable, Logger } from '@nestjs/common';
 import { NotificationType } from './interfaces';
 import { EmailService } from './email.service';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class NotificationService {
+  private readonly logger = new Logger(NotificationService.name);
+
   private readonly notificationExpirationTime = 1000 * 60 * 60 * 24 * 7;
 
   constructor(
@@ -110,6 +112,8 @@ export class NotificationService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async removeNotifications() {
+    this.logger.log('Routinely clearing notifications');
+
     await this.prismaService.notification.deleteMany({
       where: {
         OR: [
@@ -127,6 +131,8 @@ export class NotificationService {
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async sendEmailNotifications() {
+    this.logger.log('Routinely sending email notifications');
+
     const notifications = await this.prismaService.notification.findMany({
       where: { emailSent: false, read: false },
       include: { recipient: true },
@@ -141,7 +147,7 @@ export class NotificationService {
           data: { emailSent: true },
         });
       } catch (e) {
-        console.error(
+        this.logger.error(
           `Failed to send email notification with id: ${notification.id} to ${notification.recipient.email}: ${e}`,
         );
       }

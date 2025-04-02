@@ -1,4 +1,4 @@
-import { InvalidCredentialsException } from '../auth/exceptions';
+import { InvalidRegisterCredentialsException } from './exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
@@ -13,7 +13,7 @@ export class UserService {
       return await this.prismaService.user.create({ data: user });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === 'P2002') throw new InvalidCredentialsException();
+        if (e.code === 'P2002') throw new InvalidRegisterCredentialsException();
       }
 
       throw e;

@@ -4,8 +4,8 @@ import {
   type User,
   type File,
 } from '@prisma/client';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ResourceNotFoundException } from '../common/exceptions';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CommentService } from '../comment/comment.service';
 import { ProjectService } from '../project/project.service';
 import { FileLimitExceededException } from './exceptions';
@@ -16,6 +16,8 @@ import { StorageService } from './storage.service';
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
+
   private readonly fileableMap = {
     Project: { service: this.projectService, limit: 100 },
     Task: { service: this.taskService, limit: 20 },
@@ -102,6 +104,8 @@ export class FileService {
   ) {
     await this.checkFileLimit(fileableId, fileableType, files.length);
 
+    this.logger.log(`User: ${userId}, uploading ${files.length} files`);
+
     const createdFiles: (File & {
       createdBy: User;
       url?: string;
@@ -135,6 +139,8 @@ export class FileService {
 
   async deleteFile(id: number) {
     try {
+      this.logger.log(`Deleting file: ${id}`);
+
       const deleted = await this.prismaService.file.delete({ where: { id } });
 
       await this.storageService.deleteFile(deleted.fileName);

@@ -12,12 +12,14 @@ import {
 } from './dto';
 import { ResourceNotFoundException } from '../common/exceptions';
 import { VerificationService } from './verification.service';
+import { Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private userService: UserService,
     private verificationService: VerificationService,
@@ -32,6 +34,8 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
+    this.logger.log(`Registering new user: ${registerDto.nickName}`);
+
     const { password, ...userData } = registerDto;
 
     const passwordHash = await this.hashPassword(password);
@@ -47,7 +51,9 @@ export class AuthService {
         createdUser.email,
       );
     } catch {
-      console.error('Failed to send verification token');
+      this.logger.error(
+        `Failed to send verification token while registering user: ${createdUser.id}`,
+      );
     }
 
     return createdUser;
@@ -67,6 +73,8 @@ export class AuthService {
   }
 
   async sendVerificationToken(userId: number) {
+    this.logger.log(`Sending verification token to user: ${userId}`);
+
     const user = await this.userService.findUserById(userId);
 
     if (!user) throw new ResourceNotFoundException('User', userId);
@@ -80,6 +88,10 @@ export class AuthService {
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    this.logger.log(
+      `Sending password reset token to: ${forgotPasswordDto.email}`,
+    );
+
     const foundUser = await this.userService.findUserByEmail(
       forgotPasswordDto.email,
     );
@@ -99,6 +111,8 @@ export class AuthService {
   }
 
   async resetPassword(token: string, resetPasswordDto: ResetPasswordDto) {
+    this.logger.log(`Resetting password for user with token: ${token}`);
+
     const userId = await this.verificationService.verifyToken(token);
 
     await this.userService.updateUser(userId, {
@@ -107,6 +121,8 @@ export class AuthService {
   }
 
   async changePassword(changePasswordDto: ChangePasswordDto, userId: number) {
+    this.logger.log(`Changing password for user: ${userId}`);
+
     if (changePasswordDto.newPassword === changePasswordDto.oldPassword)
       throw new PasswordUnchangedException();
 

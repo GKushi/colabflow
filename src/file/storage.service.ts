@@ -4,7 +4,9 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
+import { InvalidConfigurationException } from '../common/exceptions';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { FileStorageException } from './exceptions';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 
@@ -20,7 +22,7 @@ export class StorageService {
     const bucketName = this.configService.get('AWS_BUCKET_NAME');
 
     if (!awsRegion || !awsAccessKeyId || !awsSecretAccessKey || !bucketName)
-      throw new Error('AWS credentials are not provided');
+      throw new InvalidConfigurationException();
 
     this.bucketName = bucketName;
 
@@ -41,10 +43,8 @@ export class StorageService {
 
     try {
       return await getSignedUrl(this.s3, command, { expiresIn: 300 });
-    } catch (e) {
-      console.error(e);
-
-      throw new Error('Error while generating signed URL');
+    } catch {
+      throw new FileStorageException('get');
     }
   }
 
@@ -62,10 +62,8 @@ export class StorageService {
       await this.s3.send(command);
 
       return fileName;
-    } catch (e) {
-      console.error(e);
-
-      throw new Error('Error while uploading file');
+    } catch {
+      throw new FileStorageException('upload');
     }
   }
 
@@ -77,10 +75,8 @@ export class StorageService {
 
     try {
       return await this.s3.send(command);
-    } catch (e) {
-      console.error(e);
-
-      throw new Error('Error while deleting file');
+    } catch {
+      throw new FileStorageException('delete');
     }
   }
 

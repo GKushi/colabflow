@@ -7,7 +7,7 @@ import {
   UserNotInProjectException,
 } from './exceptions';
 import { NotificationService } from '../notification/notification.service';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { NotificationType } from '../notification/interfaces';
 import { UserNotVerifiedException } from '../auth/exceptions';
 import { CommentService } from '../comment/comment.service';
@@ -20,6 +20,8 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
+
   constructor(
     private prismaService: PrismaService,
     @Inject(forwardRef(() => FileService))
@@ -78,7 +80,9 @@ export class ProjectService {
     return { ...project, files };
   }
 
-  async createProject(createProjectDto: CreateProjectDto) {
+  createProject(createProjectDto: CreateProjectDto) {
+    this.logger.log(`Creating project: ${createProjectDto.name}`);
+
     return this.prismaService.project.create({
       data: createProjectDto,
     });
@@ -117,6 +121,8 @@ export class ProjectService {
 
   async deleteProject(id: number) {
     try {
+      this.logger.log(`Deleting project: ${id}`);
+
       await this.taskService.deleteTasks(id);
 
       const deletedProject = await this.prismaService.project.delete({
