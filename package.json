@@ -20,8 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:reset": "prisma migrate reset",
     "db:migrate-dev": "prisma migrate dev",
+    "db:migrate-deploy": "prisma migrate deploy",
     "db:seed": "ts-node src/seed/seed.ts",
-    "db:seed:full": "ts-node src/seed/seed.ts -- files"
+    "db:seed:full": "ts-node src/seed/seed.ts -- files",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.740.0",
