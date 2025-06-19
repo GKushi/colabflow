@@ -1,0 +1,69 @@
+name: Deploy to AWS Lightsail (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Docker tag (default: latest)"
+        required: false
+        default: "latest"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: eu-central-1
+      ECR_REPO: colabflow-backend
+      IMAGE_TAG: ${{ github.event.inputs.tag || 'latest' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password \
+            | docker login \
+              --username AWS \
+              --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPO .
+
+      - name: Tag image for ECR
+        run: |
+          docker tag $ECR_REPO:latest \
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPO:${{ env.IMAGE_TAG }}
+
+      - name: Push image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPO:${{ env.IMAGE_TAG }}
+
+      - name: Install envsubst for template substitution
+        run: sudo apt-get install -y gettext
+
+      - name: Replace env vars in containers.json
+        run: envsubst < deploy/containers.template.json > deploy/containers.json
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          NODE_ENV: "production"
+
+      - name: Deploy to Lightsail
+        run: |
+          aws lightsail create-container-service-deployment \
+            --service-name colabflow-service \
+            --containers file://deploy/containers.json \
+            --public-endpoint file://deploy/public-endpoint.json

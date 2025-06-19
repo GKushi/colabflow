@@ -1,0 +1,17 @@
+{
+  "colabflow-backend-dev": {
+    "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/colabflow-backend:latest",
+    "command": ["/app/entrypoint.sh"],
+    "environment": {
+      "DATABASE_URL": "${DATABASE_URL}",
+      "AWS_REGION": "${AWS_REGION}",
+      "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
+      "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}",
+      "AWS_BUCKET_NAME": "${AWS_BUCKET_NAME}",
+      "NODE_ENV": "${NODE_ENV}"
+    },
+    "ports": {
+      "3000": "HTTP"
+    }
+  }
+}
