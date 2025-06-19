@@ -65,6 +65,6 @@ jobs:
       - name: Deploy to Lightsail
         run: |
           aws lightsail create-container-service-deployment \
-            --service-name colabflow-service \
+            --service-name colabflow-backend-dev \
             --containers file://deploy/containers.json \
             --public-endpoint file://deploy/public-endpoint.json
