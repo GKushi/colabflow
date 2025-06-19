@@ -15,6 +15,7 @@ import { SeedModule } from './seed/seed.module';
 import { TaskModule } from './task/task.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ConfigModule } from '@nestjs/config';
     TaskModule,
     CommentModule,
     FileModule,
+    HealthModule,
   ],
   providers: [
     Logger,

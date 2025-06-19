@@ -22,4 +22,7 @@ COPY --from=builder /app/package.json ./
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npm run db:migrate-deploy && node dist/main"]
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
+
+CMD ["/app/entrypoint.sh"]
