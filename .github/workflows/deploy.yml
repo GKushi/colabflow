@@ -45,7 +45,7 @@ jobs:
 
       - name: Tag image for ECR
         run: |
-          docker tag $ECR_REPO:latest \
+          docker tag ${{ secrets.ECR_REPO }}:latest \
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Push image to ECR
