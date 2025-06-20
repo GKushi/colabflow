@@ -15,6 +15,7 @@ jobs:
     env:
       AWS_REGION: eu-central-1
       ECR_REPO: colabflow/colabflow-backend-dev
+      CONTAINER_SERVICE_NAME: colabflow-backend-dev
       IMAGE_TAG: ${{ github.event.inputs.tag || 'latest' }}
 
     steps:
@@ -60,7 +61,15 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          CONTAINER_SERVICE_NAME: ${{ env.CONTAINER_SERVICE_NAME }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          ECR_REPO: ${{ env.ECR_REPO }}
           NODE_ENV: "production"
+
+      - name: Replace env vars in public-endpoint.json
+        run: envsubst < deploy/public-endpoint.template.json > deploy/public-endpoint.json
+        env:
+          CONTAINER_SERVICE_NAME: ${{ env.CONTAINER_SERVICE_NAME }}
 
       - name: Deploy to Lightsail
         run: |

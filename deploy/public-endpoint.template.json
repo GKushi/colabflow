@@ -1,5 +1,5 @@
 {
-  "containerName": "colabflow-backend-dev",
+  "containerName": "${CONTAINER_SERVICE_NAME}",
   "containerPort": 3000,
   "healthCheck": {
     "path": "/health",
