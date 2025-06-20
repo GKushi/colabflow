@@ -1,8 +1,14 @@
-name: Deploy to AWS Lightsail (Manual)
+name: Deploy to AWS Lightsail
 
 on:
   workflow_dispatch:
     inputs:
+      env:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+          - dev
       tag:
         description: "Docker tag (default: latest)"
         required: false
@@ -11,11 +17,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    environment: ${{ github.event.inputs.env }}
     env:
-      AWS_REGION: eu-central-1
-      ECR_REPO: colabflow/colabflow-backend-dev
-      CONTAINER_SERVICE_NAME: colabflow-backend-dev
       IMAGE_TAG: ${{ github.event.inputs.tag || 'latest' }}
 
     steps:
@@ -25,29 +28,29 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.WORKER_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.WORKER_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
         run: |
           aws ecr get-login-password \
             | docker login \
               --username AWS \
-              --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+              --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
       - name: Build Docker image
         run: |
-          docker build -t $ECR_REPO .
+          docker build -t ${{ secrets.ECR_REPO }} .
 
       - name: Tag image for ECR
         run: |
           docker tag $ECR_REPO:latest \
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPO:${{ env.IMAGE_TAG }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Push image to ECR
         run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPO:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Install envsubst for template substitution
         run: sudo apt-get install -y gettext
@@ -56,20 +59,22 @@ jobs:
         run: envsubst < deploy/containers.template.json > deploy/containers.json
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          CONTAINER_SERVICE_NAME: ${{ env.CONTAINER_SERVICE_NAME }}
+          CONTAINER_SERVICE_NAME: ${{ secrets.CONTAINER_SERVICE_NAME }}
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
-          ECR_REPO: ${{ env.ECR_REPO }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
           NODE_ENV: "production"
 
       - name: Replace env vars in public-endpoint.json
         run: envsubst < deploy/public-endpoint.template.json > deploy/public-endpoint.json
         env:
-          CONTAINER_SERVICE_NAME: ${{ env.CONTAINER_SERVICE_NAME }}
+          CONTAINER_SERVICE_NAME: ${{ secrets.CONTAINER_SERVICE_NAME }}
 
       - name: Deploy to Lightsail
         run: |
