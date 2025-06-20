@@ -1,4 +1,4 @@
-import { InvalidConfigurationException } from 'src/common/exceptions';
+import { InvalidConfigurationException } from '../common/exceptions';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 

@@ -28,6 +28,7 @@ export class CommentService {
 
   constructor(
     private prismaService: PrismaService,
+    @Inject(forwardRef(() => ProjectService))
     private projectService: ProjectService,
     private taskService: TaskService,
     @Inject(forwardRef(() => FileService))

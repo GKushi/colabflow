@@ -205,12 +205,12 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [ ] Persist chat messages in the database
   - [ ] Implement message history retrieval and pagination
 
-- [ ] Deployment
+- [x] Deployment
 
-  - [ ] Configure CI/CD pipeline using GitHub Actions or Jenkins
-  - [ ] Automate builds, testing, and deployments to staging and production
-  - [ ] Deploy application to AWS ECS, EKS, or Kubernetes cluster
-  - [ ] Implement logging and monitoring in the production environment
+  - [x] Configure CI/CD pipeline using GitHub Actions or Jenkins
+  - [x] Automate builds, testing, and deployments to staging and production
+  - [x] Deploy application to AWS ECS, EKS, or Kubernetes cluster
+  - [x] Implement logging and monitoring in the production environment
 
 - [ ] Rate Limiting and Throttling
 
@@ -236,25 +236,19 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 - [ ] Testing
 
-  - [ ] Write unit tests for all services using Jest
-  - [ ] Write integration tests for critical modules
+  - [x] Write unit tests for all services using Jest
   - [ ] Set up end-to-end (E2E) tests for user flows
   - [ ] Use mocking and test databases to isolate tests
-  - [ ] Aim for high code coverage and maintain testing reports
 
-- [ ] Database Management
+- [x] Database Management
 
   - [x] Use Prisma migrations for schema changes
-  - [ ] Optimize database queries and indexing
   - [x] Implement data seeding for development and testing environments
 
 - [ ] Documentation
   - [x] Write comprehensive README with setup instructions
   - [ ] Document codebase and architecture decisions
-  - [ ] Integrate Swagger using @nestjs/swagger
-  - [ ] Annotate controllers and DTOs with Swagger decorators
-  - [ ] Generate interactive API documentation at /api-docs
-  - [ ] Ensure all endpoints, models, and possible responses are documented
+  - [ ] Ensure all endpoints and models are documented
 
 - [ ] Future Enhancements
 
