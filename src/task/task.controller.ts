@@ -23,6 +23,7 @@ import { User } from '../auth/decorators/user.decorator';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
 import { CreateCommentDto } from '../comment/dto';
+import { Throttle } from '@nestjs/throttler';
 import { TaskService } from './task.service';
 import { EditTaskDto } from './dto';
 
@@ -135,6 +136,7 @@ export class TaskController {
   }
 
   @UseInterceptors(FilesInterceptor('file', 2))
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post(':id/comments')
   async createComment(
     @Param('id', ParseIntPipe) taskId: number,
@@ -184,6 +186,7 @@ export class TaskController {
   }
 
   @UseInterceptors(FilesInterceptor('file', 10))
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post(':id/files')
   async createFiles(
     @Param('id', ParseIntPipe) taskId: number,

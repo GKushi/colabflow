@@ -69,6 +69,18 @@ export class SeedService {
       .map((user) => ({ ...user, passwordHash }));
 
     await this.prismaService.user.createMany({ data: users });
+    // create an admin with static creds
+    await this.prismaService.user.create({
+      data: {
+        email: 'admin@email.com',
+        nickName: faker.internet.username(),
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
+        emailVerified: true,
+        passwordHash,
+        role: Role.ADMIN,
+      },
+    });
   }
 
   private generateUser() {

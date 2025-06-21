@@ -23,6 +23,7 @@ import { User } from '../auth/decorators/user.decorator';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
 import { CommentService } from './comment.service';
+import { Throttle } from '@nestjs/throttler';
 import { EditCommentDto } from './dto';
 
 @Controller('comment')
@@ -88,6 +89,7 @@ export class CommentController {
 
   @UseGuards(CommentModifyAccessGuard)
   @UseInterceptors(FilesInterceptor('file', 2))
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post(':id/files')
   async createFiles(
     @Param('id', ParseIntPipe) commentId: number,

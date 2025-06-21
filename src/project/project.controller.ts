@@ -29,6 +29,7 @@ import { UserInSession } from '../auth/interfaces';
 import { ProjectService } from './project.service';
 import { CreateCommentDto } from '../comment/dto';
 import { Role as RoleEnum } from '@prisma/client';
+import { Throttle } from '@nestjs/throttler';
 import { CreateTaskDto } from '../task/dto';
 
 @Controller('project')
@@ -209,6 +210,7 @@ export class ProjectController {
 
   @UseGuards(ProjectReadAccessGuard)
   @UseInterceptors(FilesInterceptor('file', 2))
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post(':id/comments')
   async createComment(
     @Param('id', ParseIntPipe) projectId: number,

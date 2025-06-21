@@ -1,10 +1,12 @@
 import { DomainExceptionFilter } from './common/domain-exception.filter';
 import { NotificationModule } from './notification/notification.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { Logger, MiddlewareConsumer, Module } from '@nestjs/common';
 import { LoggerMiddleware } from './common/logging.middleware';
 import { ProjectModule } from './project/project.module';
 import { CommentModule } from './comment/comment.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { HealthModule } from './health/health.module';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
@@ -15,7 +17,6 @@ import { SeedModule } from './seed/seed.module';
 import { TaskModule } from './task/task.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
-import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -31,6 +32,14 @@ import { HealthModule } from './health/health.module';
     CommentModule,
     FileModule,
     HealthModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 1000,
+          limit: 3,
+        },
+      ],
+    }),
   ],
   providers: [
     Logger,
@@ -41,6 +50,10 @@ import { HealthModule } from './health/health.module';
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     {
       provide: APP_FILTER,

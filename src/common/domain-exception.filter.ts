@@ -37,7 +37,15 @@ export class DomainExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       const httpExceptionResponse = exception.getResponse();
-      return response.status(exception.getStatus()).json(httpExceptionResponse);
+      const statusCode = exception.getStatus();
+
+      if (typeof httpExceptionResponse === 'string') {
+        return response
+          .status(statusCode)
+          .json({ statusCode, message: httpExceptionResponse });
+      }
+
+      return response.status(statusCode).json(httpExceptionResponse);
     }
 
     let statusCode = 500;
