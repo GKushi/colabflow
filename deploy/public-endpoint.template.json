@@ -2,8 +2,8 @@
   "containerName": "${CONTAINER_SERVICE_NAME}",
   "containerPort": 3000,
   "healthCheck": {
-    "path": "/health",
-    "intervalSeconds": 10,
+    "path": "/",
+    "intervalSeconds": 30,
     "timeoutSeconds": 5,
     "healthyThreshold": 2,
     "unhealthyThreshold": 3
