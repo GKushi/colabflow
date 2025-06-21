@@ -7,11 +7,11 @@ services:
       - .env
 
   app:
-    image: node:iron-alpine3.20
+    image: node:jod-alpine
     volumes:
       - .:/app
     working_dir: /app
-    command: sh -c "npm install && npm run start:dev"
+    command: sh -c "apk add --no-cache openssl && npm install && npm run db:migrate-dev && npm run start:dev"
     ports:
       - 3000:3000
     depends_on:
