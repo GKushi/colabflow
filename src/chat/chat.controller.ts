@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ChatAccessGuard } from './guards/chat-access.guard';
 import { User } from '../auth/decorators/user.decorator';
+import { UserMapper } from '../user/mappers/user.mapper';
 import { EditChatDto, GetOrCreateChatDto } from './dto';
 import { UserInSession } from '../auth/interfaces';
 import { ChatService } from './chat.service';
@@ -35,11 +36,7 @@ export class ChatController {
 
     return {
       ...chat,
-      users: chat.users.map((el) => ({
-        id: el.user.id,
-        email: el.user.email,
-        nickName: el.user.nickName,
-      })),
+      users: UserMapper.multipleToPublic(chat.users),
     };
   }
 
@@ -58,11 +55,7 @@ export class ChatController {
 
     return {
       ...chat,
-      users: chat.users.map((el) => ({
-        id: el.user.id,
-        email: el.user.email,
-        nickName: el.user.nickName,
-      })),
+      users: UserMapper.multipleToPublic(chat.users),
     };
   }
 

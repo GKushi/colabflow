@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { FileModifyAccessGuard } from './guards/file-modify-access.guard';
 import { FileReadAccessGuard } from './guards/file-read-access.guard';
+import { UserMapper } from '../user/mappers/user.mapper';
 import { FileService } from './file.service';
 
 @Controller('file')
@@ -24,11 +25,7 @@ export class FileController {
       createdById: undefined,
       fileableType: undefined,
       fileableId: undefined,
-      createdBy: {
-        id: file.createdBy.id,
-        email: file.createdBy.email,
-        nickName: file.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(file.createdBy),
     };
   }
 

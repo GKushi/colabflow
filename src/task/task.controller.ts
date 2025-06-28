@@ -20,6 +20,7 @@ import { TaskReadAccessGuard } from './guards/task-read-access.guard';
 import { CommentService } from '../comment/comment.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { User } from '../auth/decorators/user.decorator';
+import { UserMapper } from '../user/mappers/user.mapper';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
 import { CreateCommentDto } from '../comment/dto';
@@ -49,26 +50,14 @@ export class TaskController {
         id: task.project.id,
         name: task.project.name,
       },
-      assignedTo: {
-        id: task.assignedTo.id,
-        email: task.assignedTo.email,
-        nickName: task.assignedTo.nickName,
-      },
-      createdBy: {
-        id: task.createdBy.id,
-        email: task.createdBy.email,
-        nickName: task.createdBy.nickName,
-      },
+      assignedTo: UserMapper.toPublic(task.assignedTo),
+      createdBy: UserMapper.toPublic(task.createdBy),
       files: task.files.map((file) => ({
         ...file,
         createdById: undefined,
         fileableId: undefined,
         fileableType: undefined,
-        createdBy: {
-          id: file.createdBy.id,
-          email: file.createdBy.email,
-          nickName: file.createdBy.nickName,
-        },
+        createdBy: UserMapper.toPublic(file.createdBy),
       })),
     };
   }
@@ -91,16 +80,8 @@ export class TaskController {
         id: task.project.id,
         name: task.project.name,
       },
-      assignedTo: {
-        id: task.assignedTo.id,
-        email: task.assignedTo.email,
-        nickName: task.assignedTo.nickName,
-      },
-      createdBy: {
-        id: task.createdBy.id,
-        email: task.createdBy.email,
-        nickName: task.createdBy.nickName,
-      },
+      assignedTo: UserMapper.toPublic(task.assignedTo),
+      createdBy: UserMapper.toPublic(task.createdBy),
     };
   }
 
@@ -120,11 +101,7 @@ export class TaskController {
       createdById: undefined,
       commentableId: undefined,
       commentableType: undefined,
-      createdBy: {
-        id: comment.createdBy.id,
-        email: comment.createdBy.email,
-        nickName: comment.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(comment.createdBy),
       files: comment.files.map((file) => ({
         ...file,
         createdById: undefined,
@@ -170,11 +147,7 @@ export class TaskController {
       createdById: undefined,
       commentableId: undefined,
       commentableType: undefined,
-      createdBy: {
-        id: comment.createdBy.id,
-        email: comment.createdBy.email,
-        nickName: comment.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(comment.createdBy),
       files: comment.files.map((file) => ({
         ...file,
         createdById: undefined,
@@ -215,11 +188,7 @@ export class TaskController {
       createdById: undefined,
       fileableId: undefined,
       fileableType: undefined,
-      createdBy: {
-        id: file.createdBy.id,
-        email: file.createdBy.email,
-        nickName: file.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(file.createdBy),
     }));
   }
 }

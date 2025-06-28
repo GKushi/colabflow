@@ -19,6 +19,7 @@ import {
 import { CommentModifyAccessGuard } from './guards/comment-modify-access.guard';
 import { CommentReadAccessGuard } from './guards/comment-read-access.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { UserMapper } from 'src/user/mappers/user.mapper';
 import { User } from '../auth/decorators/user.decorator';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
@@ -43,11 +44,7 @@ export class CommentController {
       createdById: undefined,
       commentableId: undefined,
       commentableType: undefined,
-      createdBy: {
-        id: comment.createdBy.id,
-        email: comment.createdBy.email,
-        nickName: comment.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(comment.createdBy),
       files: comment.files.map((file) => ({
         ...file,
         createdById: undefined,
@@ -72,11 +69,7 @@ export class CommentController {
       createdById: undefined,
       commentableId: undefined,
       commentableType: undefined,
-      createdBy: {
-        id: comment.createdBy.id,
-        email: comment.createdBy.email,
-        nickName: comment.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(comment.createdBy),
     };
   }
 
@@ -121,11 +114,7 @@ export class CommentController {
       createdById: undefined,
       fileableId: undefined,
       fileableType: undefined,
-      createdBy: {
-        id: file.createdBy.id,
-        email: file.createdBy.email,
-        nickName: file.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(file.createdBy),
     }));
   }
 }
