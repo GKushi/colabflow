@@ -74,8 +74,8 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          MAIL_SENDER: ${{ secrets.MAIL_SENDER }}
-          MAIL_SECURE: ${{ secrets.MAIL_SECURE }}
+          MAIL_SENDER: ${{ vars.MAIL_SENDER }}
+          MAIL_SECURE: ${{ vars.MAIL_SECURE }}
 
 
       - name: Replace env vars in public-endpoint.json
