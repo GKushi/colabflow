@@ -17,6 +17,7 @@ import { SeedModule } from './seed/seed.module';
 import { TaskModule } from './task/task.module';
 import { FileModule } from './file/file.module';
 import { ConfigModule } from '@nestjs/config';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ConfigModule } from '@nestjs/config';
         },
       ],
     }),
+    ChatModule,
   ],
   providers: [
     Logger,
