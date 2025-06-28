@@ -1,24 +1,78 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
+import { ChatAccessGuard } from './guards/chat-access.guard';
 import { User } from '../auth/decorators/user.decorator';
+import { EditChatDto, GetOrCreateChatDto } from './dto';
 import { UserInSession } from '../auth/interfaces';
 import { ChatService } from './chat.service';
-import { GetOrCreateChatDto } from './dto';
 
 @Controller('chat')
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
+  @Get()
+  async getChats(@User() user: UserInSession) {
+    const { id } = user;
+
+    const chats = await this.chatService.getUserChats(id);
+
+    return chats;
+  }
+
+  @UseGuards(ChatAccessGuard)
+  @Get(':id')
+  async getChat(@Param('id', ParseIntPipe) id: number) {
+    const chat = await this.chatService.getChatById(id);
+
+    return {
+      ...chat,
+      users: chat.users.map((el) => ({
+        id: el.user.id,
+        email: el.user.email,
+        nickName: el.user.nickName,
+      })),
+    };
+  }
+
   @Post()
-  getOrCreateChat(
+  async getOrCreateChat(
     @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
     getOrCreateChatDto: GetOrCreateChatDto,
     @User() user: UserInSession,
   ) {
     const { id } = user;
 
-    return this.chatService.getOrCreateChat({
+    const chat = await this.chatService.getOrCreateChat({
       ...getOrCreateChatDto,
       users: [...getOrCreateChatDto.users, id],
     });
+
+    return {
+      ...chat,
+      users: chat.users.map((el) => ({
+        id: el.user.id,
+        email: el.user.email,
+        nickName: el.user.nickName,
+      })),
+    };
+  }
+
+  @UseGuards(ChatAccessGuard)
+  @Patch(':id')
+  async editChat(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
+    editChatDto: EditChatDto,
+  ) {
+    return this.chatService.editChat(id, editChatDto);
   }
 }
