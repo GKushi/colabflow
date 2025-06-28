@@ -1,5 +1,5 @@
 import { InvalidRegisterCredentialsException } from './exceptions';
-import { ResourceNotFoundException } from 'src/common/exceptions';
+import { ResourceNotFoundException } from '../common/exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
