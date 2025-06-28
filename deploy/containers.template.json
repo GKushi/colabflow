@@ -10,7 +10,13 @@
       "AWS_BUCKET_NAME": "${AWS_BUCKET_NAME}",
       "NODE_ENV": "${NODE_ENV}",
       "SESSION_SECRET": "${SESSION_SECRET}",
-      "FRONTEND_URL": "${FRONTEND_URL}"
+      "FRONTEND_URL": "${FRONTEND_URL}",
+      "MAIL_HOST": "${MAIL_HOST}",
+      "MAIL_PORT": "${MAIL_PORT}",
+      "MAIL_USER": "${MAIL_USER}",
+      "MAIL_PASSWORD": "${MAIL_PASSWORD}",
+      "MAIL_SENDER": "${MAIL_SENDER}",
+      "MAIL_SECURE": "${MAIL_SECURE}"
     },
     "ports": {
       "3000": "HTTP"
