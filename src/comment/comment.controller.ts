@@ -19,7 +19,7 @@ import {
 import { CommentModifyAccessGuard } from './guards/comment-modify-access.guard';
 import { CommentReadAccessGuard } from './guards/comment-read-access.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UserMapper } from 'src/user/mappers/user.mapper';
+import { UserMapper } from '../user/mappers/user.mapper';
 import { User } from '../auth/decorators/user.decorator';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
