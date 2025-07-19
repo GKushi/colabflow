@@ -188,10 +188,6 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Optimize database queries and indexing
   - [x] Implement data seeding for development and testing environments
 
-- [ ] Documentation
+- [x] Documentation
   - [x] Write comprehensive README with setup instructions
-  - [ ] Document codebase and architecture decisions
-
-- [ ] Future Enhancements
-
-  - [ ] Add two-factor authentication (2FA) for enhanced security
+  - [x] Document codebase and architecture decisions
