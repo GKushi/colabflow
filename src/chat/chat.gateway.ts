@@ -51,7 +51,7 @@ export class ChatGateway implements OnGatewayInit {
   constructor(private chatService: ChatService) {}
 
   afterInit() {
-    this.logger.log(`Inited successfuly`);
+    this.logger.log(`Inited successfully`);
   }
 
   @UseGuards(ChatAccessWsGuard)
