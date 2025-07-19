@@ -1,0 +1,1156 @@
+{
+	"info": {
+		"_postman_id": "70389e13-886b-40bd-9d04-2c45d4dc9f10",
+		"name": "Colabflow",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42551630"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('cookie-token', pm.response.headers.get('Set-Cookie'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableCookies": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"123123\",\n  \"email\": \"francisca_carter64@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/auth/login",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nickName\": \"uuser23\",\n  \"firstName\": \"user\",\n//   \"lastName\": \"user\",\n  \"password\": \"User1234!\",\n  \"email\":\"uuserr1@user.user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/auth/register",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/auth/logout",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send verification token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/auth/send-verification-token",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"send-verification-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/auth/verify/e11da60b-bb03-405c-8ebc-21a2068e7412",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"verify",
+								"e11da60b-bb03-405c-8ebc-21a2068e7412"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"oldPassword\": \"123123\",\n  \"newPassword\": \"User1234!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/auth/change-password",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"skye0@yahoo.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/auth/forgot-password",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"User1234!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/auth/reset-password/291797b6-cc93-42f0-9d6c-3b66bac08676",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"auth",
+								"reset-password",
+								"291797b6-cc93-42f0-9d6c-3b66bac08676"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Project",
+			"item": [
+				{
+					"name": "Get projects",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project/3",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Project-5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/project",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit project",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Project 8 description\",\n  \"name\": \"Project-8\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/project/8",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete project",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project/7",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add user to project",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project/8/users/4",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"users",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove user from project",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project/8/users/3",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"users",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get project comments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project/8/comments",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "description",
+									"value": "Aaaa Bbbbb Ccc",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/kasper/Desktop/Screenshot 2025-02-24 at 23.24.15.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/project/8/comments",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get project tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/project/8/tasks",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"assignedTo\": 4,\n  \"title\": \"Task Title\",\n  \"description\": \"Task Description\",\n  \"priority\": \"LOW\",\n  \"status\": \"TODO\",\n  \"deadline\": \"2005-05-06T20:08:33.01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/project/8/tasks",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create project file",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [
+										"/Users/kasper/Desktop/Screenshot 2025-02-24 at 23.24.15.png",
+										"/Users/kasper/Documents/file1.txt",
+										"/Users/kasper/Documents/colabflow.drawio",
+										"/Users/kasper/Documents/ubezpieczenie.pdf"
+									]
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/project/8/files",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"project",
+								"8",
+								"files"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task",
+			"item": [
+				{
+					"name": "Get task",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/task/3",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"task",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit task",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"abb\",\n  \"description\": \"123qaaa\",\n  \"status\": \"TODO\",\n  \"priority\": \"MEDIUM\",\n  \"deadline\": \"1900-10-05T07:28:28.788Z\",\n  \"assignedTo\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/task/51",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"task",
+								"51"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete task",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/task/7",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"task",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get task comments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/task/55/comments",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"task",
+								"55",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create task comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "description",
+									"value": "ASdasdasd asdasd asd asdas das dasd asdas dasd ",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/kasper/Desktop/Screenshot 2025-02-24 at 23.24.15.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/task/55/comments",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"task",
+								"55",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create task file",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [
+										"/Users/kasper/Desktop/Screenshot 2025-02-22 at 21.16.39.png",
+										"/Users/kasper/Desktop/Screenshot 2025-02-22 at 21.29.55.png"
+									]
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/task/3/files",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"task",
+								"3",
+								"files"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comment",
+			"item": [
+				{
+					"name": "Get comment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/comment/124",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"comment",
+								"124"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit comment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Comasaa\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/comment/124",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"comment",
+								"124"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/comment/124",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"comment",
+								"124"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create comment file",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/kasper/Desktop/Screenshot 2025-02-24 at 23.24.15.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/comment/124/files",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"comment",
+								"124",
+								"files"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "File",
+			"item": [
+				{
+					"name": "Get file",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/file/13",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"file",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete file",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/file/36",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"file",
+								"36"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notification",
+			"item": [
+				{
+					"name": "Get notifications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/notification",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notification"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read notifications",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/notification",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notification"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read notification",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Cookie",
+								"value": "{{cookie-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{domain}}/notification/19",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"notification",
+								"19"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "cookie-token",
+			"value": "cookie-token",
+			"type": "string"
+		}
+	]
+}
