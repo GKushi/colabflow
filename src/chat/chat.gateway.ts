@@ -14,8 +14,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { DomainExceptionWsFilter } from 'src/common/filters/domain-exception-ws.filter';
-import { SocketWithSession } from 'src/auth/interfaces/socket-with-session.interface';
+import { DomainExceptionWsFilter } from '../common/filters/domain-exception-ws.filter';
+import { SocketWithSession } from '../auth/interfaces/socket-with-session.interface';
 import { ChatAccessWsGuard } from './guards/chat-access-ws.guard';
 import { SocketStatusCode } from '../common/socket/status-codes';
 import { JoinChatDto, SendMessageDto } from './dto';

@@ -104,29 +104,6 @@ CollabFlow is a project management and team collaboration platform built with Ne
 - CI/CD pipelines using GitHub Actions or Jenkins
 - Deployment on AWS ECS or Kubernetes
 
-## Temporary Todo list
-
-- [x] Work on better logging
-  - [x] Add info logs for critical actions
-    - [x] Creating & deleting project
-    - [x] Register new user user
-    - [x] Verification of user - emails
-    - [x] Adding and deleting file
-    - [x] Resetting password and changing it
-    - [x] Email notification fail
-  - [x] Add logs for exceptions catched in services (errors unhandled are already logged by global exception filter)
-  - [x] Add configuration error
-- [x] Replace logging interceptor with middleware, because it is not working properly - auth check doesnt work, duration doesnt work
-- [x] Check forget password & send verification token endpoint
-- [x] Test logs
-- [ ] Pagination, filtering and sorting for all endpoints
-- [ ] Refinements
-  - [ ] Better permissions
-  - [ ] Add some optional database fields (e.g. assignedUser in Task model)
-  - [x] Authorization checks for specific actions (e.g. only project members can add and see its tasks)
-  - [ ] Add ability to follow tasks for users assigned to project
-  - [ ] User management for admins
-
 ## Todo list
 
 - [x] User Module
@@ -137,6 +114,29 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement user registration with email verification
   - [x] Implement user login and logout functionality
   - [x] Implement password reset functionality
+  - [x] Protect routes using authentication guards
+  - [x] Hash passwords using bcrypt
+  - [x] Set up session storage
+
+- [x] Role and Permission Module
+
+  - [x] Define roles: Administrator, Manager, Team Member
+  - [x] Create Role entity and establish relationships with User entity
+  - [x] Create custom decorators and guards for role verification
+  - [x] Assign and manage user roles and permissions
+
+- [x] Authentication and Authorization
+
+  - [x] Configure session middleware
+  - [x] Implement session-based authentication
+  - [x] Set up secure session configuration (secure cookies, proper expiration)
+
+- [x] Project Module
+
+  - [x] Generate Project module, controller, and service
+  - [x] Define Project entity (fields: id, name, description, status, createdAt, updatedAt)
+  - [x] Create DTOs for project creation and updates
+  - [x] Implement CRUD operations for projects
   - [x] Protect routes using authentication guards
   - [x] Hash passwords using bcrypt
   - [x] Set up session storage
@@ -227,30 +227,21 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Configure log transports to files and external logging services
   - [x] Correlate logs with user sessions and requests
 
-- [ ] Automated Backups
+- [x] Email Service
 
-  - [ ] Set up cron jobs for regular database backups
-  - [ ] Configure backup storage on AWS S3 with encryption
-  - [ ] Implement backup rotation and retention policies
-  - [ ] Test backup and restore procedures
-
-- [ ] Testing
-
-  - [x] Write unit tests for all services using Jest
-  - [ ] Set up end-to-end (E2E) tests for user flows
-  - [ ] Use mocking and test databases to isolate tests
+  - [x] Set up email service using SendGrid or SMTP
+  - [x] Create email templates for various notifications
 
 - [x] Database Management
 
   - [x] Use Prisma migrations for schema changes
+  - [x] Optimize database queries and indexing
   - [x] Implement data seeding for development and testing environments
-
-- [ ] Documentation
-  - [x] Write comprehensive README with setup instructions
-  - [ ] Document codebase and architecture decisions
-  - [ ] Ensure all endpoints and models are documented
 
 - [ ] Future Enhancements
 
   - [ ] Add two-factor authentication (2FA) for enhanced security
-  - [ ] Allow users to manage notification preferences
+
+- [ ] Documentation
+  - [x] Write comprehensive README with setup instructions
+  - [ ] Document codebase and architecture decisions
