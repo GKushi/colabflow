@@ -1,4 +1,5 @@
 import { InvalidRegisterCredentialsException } from './exceptions';
+import { ResourceNotFoundException } from '../common/exceptions';
 import { PrismaService } from '../prisma/prisma.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
@@ -40,5 +41,13 @@ export class UserService {
       where: { id },
       data,
     });
+  }
+
+  async checkIfUserVerified(id: number) {
+    const user = await this.findUserById(id);
+
+    if (!user) throw new ResourceNotFoundException('User', id);
+
+    return user.emailVerified;
   }
 }

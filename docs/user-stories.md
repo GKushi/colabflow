@@ -62,3 +62,6 @@ As a **Team Member**, I want to be able to receive email notifications if I'm aw
 
 As a **Team Member**, I want to be able to chat with other members of a project so that we can discuss things in real-time.
 As a **Team Member**, I want to be able to see chat history so that I can catch up on what I missed.
+As a **Team Member**, I want to chat with groups of users that I pick so we can keep up group discussions.
+As a **Team Member**, I want to see my last chat activity so I can quickly go back to some of the discussions.
+As a **Team Member**, I want to my chats to be encrypted so private things that I talk about are not leaked.

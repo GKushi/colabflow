@@ -20,15 +20,16 @@ import {
 import { ProjectReadAccessGuard } from './guards/project-read-access.guard';
 import { CommentService } from '../comment/comment.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { Role } from '../auth/decorators/role.decorator';
 import { User } from '../auth/decorators/user.decorator';
+import { Role } from '../auth/decorators/role.decorator';
+import { UserMapper } from '../user/mappers/user.mapper';
 import { CreateProjectDto, EditProjectDto } from './dto';
 import { TaskService } from '../task/task.service';
 import { FileService } from '../file/file.service';
 import { UserInSession } from '../auth/interfaces';
 import { ProjectService } from './project.service';
-import { CreateCommentDto } from '../comment/dto';
 import { Role as RoleEnum } from '@prisma/client';
+import { CreateCommentDto } from '../comment/dto';
 import { Throttle } from '@nestjs/throttler';
 import { CreateTaskDto } from '../task/dto';
 
@@ -53,21 +54,13 @@ export class ProjectController {
 
     return {
       ...project,
-      users: project.users.map((el) => ({
-        id: el.user.id,
-        email: el.user.email,
-        nickName: el.user.nickName,
-      })),
+      users: UserMapper.multipleToPublic(project.users),
       files: project.files.map((file) => ({
         ...file,
         createdById: undefined,
         fileableId: undefined,
         fileableType: undefined,
-        createdBy: {
-          id: file.createdBy.id,
-          email: file.createdBy.email,
-          nickName: file.createdBy.nickName,
-        },
+        createdBy: UserMapper.toPublic(file.createdBy),
       })),
     };
   }
@@ -135,11 +128,7 @@ export class ProjectController {
         deadline: task.deadline,
         status: task.status,
         priority: task.priority,
-        assignedTo: {
-          id: task.assignedTo.id,
-          email: task.assignedTo.email,
-          nickName: task.assignedTo.nickName,
-        },
+        assignedTo: UserMapper.toPublic(task.assignedTo),
       };
     });
   }
@@ -167,16 +156,8 @@ export class ProjectController {
         id: task.project.id,
         name: task.project.name,
       },
-      createdBy: {
-        id: task.createdBy.id,
-        email: task.createdBy.email,
-        nickName: task.createdBy.nickName,
-      },
-      assignedTo: {
-        id: task.assignedTo.id,
-        email: task.assignedTo.email,
-        nickName: task.assignedTo.nickName,
-      },
+      createdBy: UserMapper.toPublic(task.createdBy),
+      assignedTo: UserMapper.toPublic(task.assignedTo),
     };
   }
 
@@ -193,11 +174,7 @@ export class ProjectController {
       createdById: undefined,
       commentableId: undefined,
       commentableType: undefined,
-      createdBy: {
-        id: comment.createdBy.id,
-        email: comment.createdBy.email,
-        nickName: comment.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(comment.createdBy),
       files: comment.files.map((file) => ({
         ...file,
         createdById: undefined,
@@ -244,11 +221,7 @@ export class ProjectController {
       createdById: undefined,
       commentableId: undefined,
       commentableType: undefined,
-      createdBy: {
-        id: comment.createdBy.id,
-        email: comment.createdBy.email,
-        nickName: comment.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(comment.createdBy),
       files: comment.files.map((file) => ({
         ...file,
         createdById: undefined,
@@ -289,11 +262,7 @@ export class ProjectController {
       createdById: undefined,
       fileableId: undefined,
       fileableType: undefined,
-      createdBy: {
-        id: file.createdBy.id,
-        email: file.createdBy.email,
-        nickName: file.createdBy.nickName,
-      },
+      createdBy: UserMapper.toPublic(file.createdBy),
     }));
   }
 }
