@@ -30,9 +30,11 @@ import { UserInSession } from '../auth/interfaces';
 import { ProjectService } from './project.service';
 import { Role as RoleEnum } from '@prisma/client';
 import { CreateCommentDto } from '../comment/dto';
+import { ApiCookieAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CreateTaskDto } from '../task/dto';
 
+@ApiCookieAuth()
 @Controller('project')
 export class ProjectController {
   constructor(

@@ -1,5 +1,7 @@
 import { SessionIoAdapter } from './common/socket/session-io.adapter';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import { WinstonModule } from 'nest-winston';
 import { transports, format } from 'winston';
@@ -36,6 +38,24 @@ async function bootstrap() {
   app.use(sessionMiddleware);
 
   app.useWebSocketAdapter(new SessionIoAdapter(app, sessionMiddleware));
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Colabflow API')
+    .setVersion('1.0')
+    .addCookieAuth('connect.sid')
+    .build();
+
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig);
+
+  const configService = app.get(ConfigService);
+  const env = configService.get('NODE_ENV');
+  console.log(env);
+  if (env === 'development')
+    SwaggerModule.setup('api/docs', app, documentFactory, {
+      jsonDocumentUrl: '/api/docs-json',
+    });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 

@@ -21,6 +21,7 @@ import { NoVerification } from './decorators/no-verification.decorator';
 import { SessionWithUser, UserInSession } from './interfaces';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
+import { ApiCookieAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -65,6 +66,7 @@ export class AuthController {
     };
   }
 
+  @ApiCookieAuth()
   @Post('logout')
   @NoVerification()
   @HttpCode(HttpStatus.OK)
@@ -77,6 +79,7 @@ export class AuthController {
     });
   }
 
+  @ApiCookieAuth()
   @Get('send-verification-token')
   @NoVerification()
   async sendVerificationToken(@User() user: UserInSession) {
@@ -122,6 +125,7 @@ export class AuthController {
     return { success: true, message: 'Password reset' };
   }
 
+  @ApiCookieAuth()
   @Post('change-password')
   @NoVerification()
   @HttpCode(HttpStatus.OK)

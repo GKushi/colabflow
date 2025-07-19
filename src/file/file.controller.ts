@@ -9,8 +9,10 @@ import {
 import { FileModifyAccessGuard } from './guards/file-modify-access.guard';
 import { FileReadAccessGuard } from './guards/file-read-access.guard';
 import { UserMapper } from '../user/mappers/user.mapper';
+import { ApiCookieAuth } from '@nestjs/swagger';
 import { FileService } from './file.service';
 
+@ApiCookieAuth()
 @Controller('file')
 export class FileController {
   constructor(private fileService: FileService) {}

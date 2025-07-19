@@ -2,7 +2,9 @@ import { Controller, Get, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { User } from '../auth/decorators/user.decorator';
 import { UserInSession } from '../auth/interfaces';
+import { ApiCookieAuth } from '@nestjs/swagger';
 
+@ApiCookieAuth()
 @Controller('notification')
 export class NotificationController {
   constructor(private notificationService: NotificationService) {}

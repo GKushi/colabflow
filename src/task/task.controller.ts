@@ -24,10 +24,12 @@ import { UserMapper } from '../user/mappers/user.mapper';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
 import { CreateCommentDto } from '../comment/dto';
+import { ApiCookieAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { TaskService } from './task.service';
 import { EditTaskDto } from './dto';
 
+@ApiCookieAuth()
 @Controller('task')
 @UseGuards(TaskReadAccessGuard)
 export class TaskController {

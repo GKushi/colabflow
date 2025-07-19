@@ -31,62 +31,11 @@ CollabFlow is a project management and team collaboration platform built with Ne
 
 ### Real-Time Communication
 
-- Uses Socket.IO for live updates, notifications, and team chat
+- Uses Socket.IO for team chat
 
 ### Email Notifications
 
 - Automated emails for important events via SendGrid or SMTP services
-
-### Automated Backups
-
-- Regular database backups stored securely, e.g., on AWS S3
-
-## Core Modules
-
-### Users
-
-- Registration, login, logout
-- Profile management
-- Password reset and email verification
-
-### Roles & Permissions
-
-- Assign predefined roles
-- Middleware for access control based on roles
-
-### Projects
-
-- Create, edit, delete projects
-- Assign users to projects
-- Manage project statuses
-
-### Tasks
-
-- CRUD operations for tasks within projects
-- Assign tasks to users
-- Set priorities, deadlines, statuses
-
-### Comments
-
-- Add comments to tasks
-- Support for Markdown formatting
-
-### Files
-
-- Upload and manage files related to tasks and projects
-
-### Notifications
-
-- In-app notifications
-- Email alerts for key events
-
-### Chat
-
-- Real-time team communication
-
-### Search
-
-- Advanced search with filters and pagination
 
 ## Security Measures
 
@@ -96,7 +45,6 @@ CollabFlow is a project management and team collaboration platform built with Ne
 ## Testing
 
 - Unit Tests using Jest
-- Integration Tests for critical modules
 
 ## Deployment
 

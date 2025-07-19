@@ -16,8 +16,10 @@ import { User } from '../auth/decorators/user.decorator';
 import { UserMapper } from '../user/mappers/user.mapper';
 import { EditChatDto, GetOrCreateChatDto } from './dto';
 import { UserInSession } from '../auth/interfaces';
+import { ApiCookieAuth } from '@nestjs/swagger';
 import { ChatService } from './chat.service';
 
+@ApiCookieAuth()
 @Controller('chat')
 export class ChatController {
   constructor(private chatService: ChatService) {}

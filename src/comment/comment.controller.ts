@@ -19,14 +19,16 @@ import {
 import { CommentModifyAccessGuard } from './guards/comment-modify-access.guard';
 import { CommentReadAccessGuard } from './guards/comment-read-access.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UserMapper } from '../user/mappers/user.mapper';
 import { User } from '../auth/decorators/user.decorator';
+import { UserMapper } from '../user/mappers/user.mapper';
 import type { UserInSession } from '../auth/interfaces';
 import { FileService } from '../file/file.service';
 import { CommentService } from './comment.service';
+import { ApiCookieAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { EditCommentDto } from './dto';
 
+@ApiCookieAuth()
 @Controller('comment')
 export class CommentController {
   constructor(
