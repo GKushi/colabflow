@@ -1,4 +1,4 @@
-# CollabFlow
+# ColabFlow
 
 ![ColabFlow Cover](docs/cover.png)
 
