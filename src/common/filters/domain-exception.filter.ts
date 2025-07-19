@@ -4,7 +4,7 @@ import {
   UserNotVerifiedException,
   UserAlreadyVerifiedException,
   PasswordUnchangedException,
-} from '../auth/exceptions';
+} from '../../auth/exceptions';
 import {
   ExceptionFilter,
   Catch,
@@ -16,13 +16,14 @@ import {
 import {
   UserNotInProjectException,
   UserAlreadyInProjectException,
-} from '../project/exceptions';
+} from '../../project/exceptions';
 import {
   PermissionDeniedException,
   ResourceNotFoundException,
-} from './exceptions';
-import { InvalidRegisterCredentialsException } from '../user/exceptions';
-import { FileLimitExceededException } from '../file/exceptions';
+} from '../exceptions';
+import { UnauthorizedException } from '../exceptions/unauthorized.exception';
+import { InvalidRegisterCredentialsException } from '../../user/exceptions';
+import { FileLimitExceededException } from '../../file/exceptions';
 import { Response } from 'express';
 
 @Catch(Error)
@@ -72,6 +73,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
         message = exception.message;
         break;
       case InvalidCredentialsException:
+      case UnauthorizedException:
         statusCode = HttpStatus.UNAUTHORIZED;
         error = 'Unauthorized';
         message = exception.message;

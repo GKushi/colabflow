@@ -1,3 +1,4 @@
+import { SessionIoAdapter } from './common/socket/session-io.adapter';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { PrismaClient } from '@prisma/client';
 import { WinstonModule } from 'nest-winston';
@@ -18,22 +19,23 @@ async function bootstrap() {
     }),
   });
 
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET || 'example-secret',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: 24 * 60 * 60 * 1000, // 24h
-      },
-      store: new PrismaSessionStore(new PrismaClient(), {
-        checkPeriod: 2 * 60 * 1000, //ms
-        dbRecordIdIsSessionId: true,
-        dbRecordIdFunction: undefined,
-      }),
+  const sessionMiddleware = session({
+    secret: process.env.SESSION_SECRET || 'example-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000, // 24h
+    },
+    store: new PrismaSessionStore(new PrismaClient(), {
+      checkPeriod: 2 * 60 * 1000, //ms
+      dbRecordIdIsSessionId: true,
+      dbRecordIdFunction: undefined,
     }),
-  );
+  });
 
+  app.use(sessionMiddleware);
+
+  app.useWebSocketAdapter(new SessionIoAdapter(app, sessionMiddleware));
   await app.listen(process.env.PORT ?? 3000);
 }
 

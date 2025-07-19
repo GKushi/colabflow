@@ -2,9 +2,13 @@ import {
   PermissionDeniedException,
   ResourceNotFoundException,
 } from '../common/exceptions';
+import {
+  EditChatDto,
+  GetChatMessagesQueryDto,
+  GetOrCreateChatDto,
+} from './dto';
 import { UserNotVerifiedException } from '../auth/exceptions';
 import { PrismaService } from '../prisma/prisma.service';
-import { EditChatDto, GetOrCreateChatDto } from './dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { UserInSession } from '../auth/interfaces';
@@ -69,6 +73,37 @@ export class ChatService {
     });
 
     return editedChat;
+  }
+
+  async sendMessageToChat(
+    chatId: number,
+    user: UserInSession,
+    message: string,
+  ) {
+    await this.checkAccess(user, chatId);
+
+    return this.prismaService.message.create({
+      data: {
+        chatId,
+        createdById: user.id,
+        description: message,
+      },
+    });
+  }
+
+  async getChatMessages(
+    chatId: number,
+    getChatMessagesQueryDto: GetChatMessagesQueryDto,
+  ) {
+    const messages = await this.prismaService.message.findMany({
+      where: { chatId },
+      orderBy: { createdAt: 'desc' },
+      skip: getChatMessagesQueryDto.offset || 0,
+      take: getChatMessagesQueryDto.limit || 50,
+      include: { createdBy: true },
+    });
+
+    return messages;
   }
 
   private async createChat(getOrCreateChatDto: GetOrCreateChatDto) {

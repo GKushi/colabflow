@@ -196,14 +196,14 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Implement mechanism for clearing old notifications
   - [x] Send email notifications for important events (e.g., password reset, project invitation)
 
-- [ ] Chat Module
+- [x] Chat Module
 
-  - [ ] Implement real-time chat using Socket.IO
-  - [ ] Generate Chat module, controller, and service
-  - [ ] Define ChatMessage entity (fields: id, content, senderId, channelId, createdAt)
-  - [ ] Implement chat channels (e.g., general, project-specific)
-  - [ ] Persist chat messages in the database
-  - [ ] Implement message history retrieval and pagination
+  - [x] Implement real-time chat using Socket.IO
+  - [x] Generate Chat module, controller, and service
+  - [x] Define ChatMessage entity (fields: id, content, senderId, channelId, createdAt)
+  - [x] Implement chat channels (e.g., general, project-specific)
+  - [x] Persist chat messages in the database
+  - [x] Implement message history retrieval and pagination
 
 - [x] Deployment
 
@@ -212,13 +212,13 @@ CollabFlow is a project management and team collaboration platform built with Ne
   - [x] Deploy application to AWS ECS, EKS, or Kubernetes cluster
   - [x] Implement logging and monitoring in the production environment
 
-- [ ] Rate Limiting and Throttling
+- [x] Rate Limiting and Throttling
 
-  - [ ] Install and configure @nestjs/throttler
-  - [ ] Implement global rate limiting for the application
-  - [ ] Set up custom rate limits for specific endpoints
-  - [ ] Configure rate limits based on user roles and IP addresses
-  - [ ] Implement protection against brute-force attacks on authentication endpoints
+  - [x] Install and configure @nestjs/throttler
+  - [x] Implement global rate limiting for the application
+  - [x] Set up custom rate limits for specific endpoints
+  - [x] Configure rate limits based on IP addresses
+  - [x] Implement protection against brute-force attacks on authentication endpoints
 
 - [x] Logging
 

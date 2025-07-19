@@ -1,0 +1,8 @@
+export enum SocketStatusCode {
+  SUCCESS = 1000,
+  INTERNAL_SERVER_ERROR = 1001,
+  BAD_REQUEST = 1002,
+  FORBIDDEN = 1003,
+  NOT_FOUND = 1004,
+  UNAUTHORIZED = 1005,
+}

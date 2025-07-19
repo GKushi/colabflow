@@ -6,9 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import { GetChatMessagesQueryDto } from './dto/get-chat-messages-query.dto';
 import { ChatAccessGuard } from './guards/chat-access.guard';
 import { User } from '../auth/decorators/user.decorator';
 import { UserMapper } from '../user/mappers/user.mapper';
@@ -67,5 +69,25 @@ export class ChatController {
     editChatDto: EditChatDto,
   ) {
     return this.chatService.editChat(id, editChatDto);
+  }
+
+  @UseGuards(ChatAccessGuard)
+  @Get(':id/messages')
+  async getChatMessages(
+    @Param('id', ParseIntPipe) id: number,
+    @Query(new ValidationPipe({ forbidNonWhitelisted: true, whitelist: true }))
+    getChatMessagesQueryDto: GetChatMessagesQueryDto,
+  ) {
+    const messages = await this.chatService.getChatMessages(
+      id,
+      getChatMessagesQueryDto,
+    );
+
+    return messages.map((message) => ({
+      ...message,
+      createdById: undefined,
+      chatId: undefined,
+      createdBy: UserMapper.toPublic(message.createdBy),
+    }));
   }
 }
